@@ -1,0 +1,878 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Miss Lily — английский</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Seymour+One&display=swap" rel="stylesheet">
+<style>
+/* ===== Оформление «Чаепитие в Лондоне» ===== */
+:root{
+  --bg:#fbf3e3; --ink:#1d2b53; --soft:#5a6385; --panel:#1d2b53; --panel-ink:#fff;
+  --red:#c8102e; --red2:#a00d25; --win:#ffe9a8; --gold:#ffcf33; --card:#fff;
+  --ok:#2e9e5b; --line:#1d2b53; --shadow:rgba(29,43,83,.25); --sky:#1d2b53;
+}
+html.dark{
+  --bg:#10172e; --ink:#f4ecd8; --soft:#b9bfd8; --panel:#26355f; --panel-ink:#fff;
+  --red:#d62a45; --red2:#a8182f; --win:#ffe9a8; --gold:#ffcf33; --card:#1b2546;
+  --ok:#3fbf75; --line:#8f9cc8; --shadow:rgba(0,0,0,.45); --sky:#26355f;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--ink);font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;overflow-x:hidden}
+body{min-height:100vh}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+#app{max-width:480px;margin:0 auto;padding:14px 14px 92px;display:flex;flex-direction:column;gap:12px;min-height:100vh;position:relative}
+.sky{position:fixed;left:0;right:0;bottom:0;height:64px;pointer-events:none;z-index:0;display:flex;justify-content:center}
+.sky svg{width:100%;max-width:480px;height:64px}
+#app>*{position:relative;z-index:1}
+h1,.ttl{font-family:'Nunito',sans-serif;font-weight:900;font-size:26px;line-height:1.2;color:var(--red)}
+html.dark h1,html.dark .ttl{color:#ff6b80}
+.muted{color:var(--soft);font-size:20px}
+
+/* шапка */
+.hdr{display:flex;gap:10px;align-items:center}
+.avatar{width:76px;height:76px;border-radius:50%;font-size:44px;display:grid;place-items:center;flex:none;background:var(--red);border:4px solid var(--line)}
+.avatar.sm{width:58px;height:58px;font-size:32px}
+.hb{flex:1;min-width:0}
+.name{font-family:'Seymour One',sans-serif;font-size:20px;color:var(--red);margin-bottom:4px}
+html.dark .name{color:#ff6b80}
+.bubble{background:var(--card);border:3px solid var(--line);border-radius:18px 18px 18px 4px;padding:8px 12px;font-size:20px;line-height:1.25}
+.bubble b{color:var(--red)} html.dark .bubble b{color:#ff8a9b}
+.strip{background:var(--panel);color:var(--panel-ink);border-radius:16px;padding:8px 12px}
+.strip .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.cups{font-size:23px;letter-spacing:1px;white-space:nowrap}
+.bar{height:14px;border-radius:9px;margin-top:6px;overflow:hidden;background:#3a4a7a}
+.bar i{display:block;height:100%;border-radius:9px;background:var(--gold);transition:width .3s}
+
+/* карточки-автобусы */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{background:var(--red);color:#fff;border-radius:22px 22px 14px 14px;border-top:16px solid var(--red2);box-shadow:inset 0 -6px 0 rgba(0,0,0,.18);min-height:112px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;font-size:21px;font-weight:900;position:relative}
+.card:before{content:"";position:absolute;top:-12px;left:12px;right:12px;height:8px;background:repeating-linear-gradient(90deg,var(--win) 0 22px,transparent 22px 30px);border-radius:3px}
+.card .em{font-size:40px;line-height:1.1}
+.card small{font-size:20px;font-weight:800;opacity:.9}
+.card.wide{grid-column:span 2;flex-direction:row;gap:14px;font-size:25px}
+.card.wide .em{font-size:48px}
+.card.wide .tx{display:flex;flex-direction:column;align-items:flex-start;text-align:left}
+.card.navy{background:var(--panel);border-top-color:#121c3a;min-height:84px;font-size:20px}
+html.dark .card.navy{border-top-color:#1a2547}
+.card.navy .em{font-size:32px}
+.card.done{background:#2b7a4b;border-top-color:#1f5c38}
+.card:active,.opt:active,.btn:active{transform:translateY(2px)}
+
+/* экран задания */
+.top{display:flex;align-items:center;gap:8px}
+.back{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-size:26px;font-weight:900;flex:none;background:var(--panel);color:#fff}
+.prog{flex:1;font-size:20px;font-weight:900;min-width:0}
+.prog .bar{background:#cfd3e2} html.dark .prog .bar{background:#3a4a7a}
+.streak{font-size:22px;font-weight:900;padding:8px 12px;border-radius:30px;flex:none;background:var(--red);color:#fff}
+.coach{display:flex;gap:10px;align-items:center}
+.coach .bubble{flex:1}
+.stage{display:flex;flex-direction:column;align-items:center;gap:12px;padding:6px 0}
+.pic{min-width:170px;min-height:150px;padding:10px 18px;display:grid;place-items:center;font-size:96px;line-height:1.05;background:#fff;border:10px solid #fff;outline:4px dashed var(--red);outline-offset:-18px;box-shadow:0 8px 18px var(--shadow);transform:rotate(-2deg);color:#1d2b53;text-align:center}
+.pic.txt{font-size:40px;font-weight:900;padding:26px 24px;max-width:100%;word-break:break-word}
+.pic.ru{font-size:32px}
+.word{font-size:40px;font-weight:900;text-align:center;line-height:1.1;word-break:break-word}
+.tr{font-size:24px;color:var(--soft);text-align:center}
+.ru{font-size:24px;text-align:center}
+.say{min-height:56px;padding:0 22px;border-radius:30px;display:inline-flex;align-items:center;gap:8px;font-size:22px;font-weight:900;background:var(--panel);color:#fff}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opts.one{grid-template-columns:1fr}
+.opt{min-height:78px;padding:8px 10px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:36px;font-weight:900;position:relative;background:var(--card);color:var(--ink);border:4px solid var(--line);border-radius:14px;box-shadow:0 6px 0 var(--line);text-align:center;line-height:1.1;word-break:break-word}
+.opt.small{font-size:26px}
+.opt .oem{font-size:30px}
+.opt.tried{opacity:.55}
+.opt.tried:after{content:attr(data-hint);position:absolute;right:8px;top:4px;font-size:22px}
+.opt.right{background:var(--ok);border-color:var(--ok);color:#fff;box-shadow:0 6px 0 #1f6e3f}
+.opt.sel{background:var(--gold);color:#1d2b53}
+.opt[disabled]{pointer-events:none}
+.btn{min-height:64px;padding:10px 18px;border-radius:18px;font-size:22px;font-weight:900;background:var(--red);color:#fff;box-shadow:0 6px 0 var(--red2);width:100%}
+.btn.navy{background:var(--panel);box-shadow:0 6px 0 #0e1630}
+.btn.green{background:var(--ok);box-shadow:0 6px 0 #1f6e3f}
+.btn.ghost{background:var(--card);color:var(--ink);border:3px solid var(--line);box-shadow:0 5px 0 var(--line)}
+.row2{display:flex;gap:10px}.row2>*{flex:1}
+.hint{min-height:56px;padding:0 18px;border-radius:30px;font-size:21px;background:var(--gold);color:#1d2b53;align-self:center}
+.tokens{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;min-height:70px}
+.tok{min-height:60px;padding:4px 14px;border-radius:14px;font-size:36px;font-weight:900;background:var(--card);color:var(--ink);border:3px solid var(--line);box-shadow:0 5px 0 var(--line)}
+.answer{min-height:84px;border:3px dashed var(--line);border-radius:16px;padding:8px;display:flex;flex-wrap:wrap;gap:8px;align-content:center;justify-content:center}
+.answer .tok{background:var(--win);color:#1d2b53}
+.list{display:flex;flex-direction:column;gap:10px}
+.item{display:flex;align-items:center;gap:12px;min-height:64px;padding:10px 14px;border-radius:16px;background:var(--card);border:3px solid var(--line);font-size:21px;text-align:left}
+.item .n{font-weight:900;font-size:22px;color:var(--red);min-width:30px}
+.item.cur{border-color:var(--red);box-shadow:0 0 0 3px var(--red)}
+.item .st{margin-left:auto;font-size:22px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:6px 12px;border-radius:20px;background:var(--card);border:2px solid var(--line);font-size:20px}
+.chip.got{background:var(--win);color:#1d2b53;border-color:var(--gold)}
+.big{font-size:56px;text-align:center}
+.center{text-align:center}
+.findtask{font-size:26px;line-height:1.3;text-align:center;background:var(--card);border:3px solid var(--line);border-radius:18px;padding:16px}
+.findtask b{font-size:36px;color:var(--red)} html.dark .findtask b{color:#ff8a9b}
+.toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);max-width:92%;background:var(--panel);color:#fff;padding:12px 16px;border-radius:16px;font-size:20px;z-index:20;box-shadow:0 8px 20px rgba(0,0,0,.3)}
+.finish{position:fixed;left:0;right:0;bottom:12px;display:flex;justify-content:center;z-index:5;padding:0 14px;pointer-events:none}
+.finish[hidden]{display:none}
+.finish .btn{max-width:452px;pointer-events:auto}
+</style>
+</head>
+<body>
+<div class="sky" aria-hidden="true"><svg viewBox="0 0 340 64" preserveAspectRatio="xMidYMax meet"><g fill="var(--sky)">
+<rect x="0" y="36" width="40" height="28"/><polygon points="0,36 20,22 40,36"/>
+<rect x="46" y="8" width="22" height="56"/><polygon points="46,8 57,-4 68,8"/><circle cx="57" cy="22" r="7" fill="#ffcf33"/>
+<rect x="74" y="30" width="50" height="34"/><rect x="130" y="40" width="34" height="24"/>
+<rect x="250" y="26" width="44" height="38"/><path d="M300 64 a20 20 0 0 1 40 0z"/></g>
+<g><rect x="170" y="32" width="70" height="28" rx="6" fill="#c8102e"/><rect x="176" y="36" width="58" height="8" fill="#ffe9a8"/><rect x="176" y="48" width="58" height="6" fill="#ffe9a8"/>
+<circle cx="184" cy="61" r="5" fill="#1d2b53"/><circle cx="226" cy="61" r="5" fill="#1d2b53"/></g></svg></div>
+<div id="app"><p class="muted center" style="margin-top:40vh">☕ Загружаю…</p></div>
+<div class="finish" id="finish" hidden><button class="btn green" data-act="finish">✅ Закончить</button></div>
+
+<script>
+"use strict";
+/* ============================================================
+   Мини-приложение «Мисс Лили». Всё содержимое — из data.json
+   (его собирает СОБРАТЬ_ДАННЫЕ.py из программы бота).
+   Нейросети здесь нет: ответы проверяет программа.
+   ============================================================ */
+const TG = window.Telegram && window.Telegram.WebApp;
+const IN_TG = !!(TG && TG.initData);
+const BOT_LINK = "https://t.me/tvoi_tutor_bot";
+const URLP = new URLSearchParams(location.search);
+const $app = document.getElementById("app");
+const $finish = document.getElementById("finish");
+
+let DATA = null, ALL = {}, P = null;
+const S = { results: {}, games: [], lessons: [], started: Date.now(), streak: 0 };  // это занятие
+
+/* ---------- тема Telegram ---------- */
+function applyTheme() {
+  let dark = false;
+  if (IN_TG && TG.colorScheme) dark = TG.colorScheme === "dark";
+  else if (window.matchMedia) dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  document.documentElement.classList.toggle("dark", dark);
+  if (IN_TG && TG.setHeaderColor) { try { TG.setHeaderColor(dark ? "#10172e" : "#fbf3e3"); TG.setBackgroundColor(dark ? "#10172e" : "#fbf3e3"); } catch (e) {} }
+}
+if (TG) { try { TG.ready(); TG.expand(); TG.onEvent("themeChanged", applyTheme); } catch (e) {} }
+applyTheme();
+
+/* ---------- мелочи ---------- */
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const ruShort = ru => String(ru).split(" (")[0];
+const today = () => new Date().toISOString().slice(0, 10);
+const kidName = () => { try { return (TG.initDataUnsafe.user.first_name || "").trim(); } catch (e) { return ""; } };
+const PRAISE = ["Умница! 🎉", "Супер! ⭐", "Yes! Отлично! 🎉", "Well done! 👏", "Brilliant! 💂", "Молодец! ☕"];
+function toast(html, ms) {
+  const t = document.createElement("div"); t.className = "toast"; t.innerHTML = html;
+  document.body.appendChild(t); setTimeout(() => t.remove(), ms || 2600);
+}
+function haptic(kind) { if (!IN_TG) return; try { TG.HapticFeedback.notificationOccurred(kind); } catch (e) {} }
+
+/* ---------- прогресс: CloudStorage Telegram + запасной localStorage ---------- */
+const LS_KEY = "misslily_p1", CHUNK = 3000, MAXC = 10;
+function freshP() { return { v: 1, ts: 0, lesson: 1, done: [], extra: {}, words: {}, records: {}, days: {}, pending: null }; }
+function cloudOk() { try { return !!(IN_TG && TG.CloudStorage && TG.isVersionAtLeast && TG.isVersionAtLeast("6.9")); } catch (e) { return false; } }
+function lsGet() { try { return JSON.parse(localStorage.getItem(LS_KEY) || "null"); } catch (e) { return null; } }
+function lsSet(s) { try { localStorage.setItem(LS_KEY, s); } catch (e) {} }
+function cloudGet() {
+  return new Promise(res => {
+    if (!cloudOk()) return res(null);
+    const keys = ["p_n"]; for (let i = 0; i < MAXC; i++) keys.push("p_" + i);
+    const t = setTimeout(() => res(null), 4000);
+    try {
+      TG.CloudStorage.getItems(keys, (err, vals) => {
+        clearTimeout(t);
+        if (err || !vals || !vals.p_n) return res(null);
+        let s = ""; for (let i = 0; i < +vals.p_n; i++) s += vals["p_" + i] || "";
+        try { res(JSON.parse(s)); } catch (e) { res(null); }
+      });
+    } catch (e) { clearTimeout(t); res(null); }
+  });
+}
+function save() {
+  P.ts = Date.now();
+  const s = JSON.stringify(P);
+  lsSet(s);
+  if (!cloudOk()) return;
+  const parts = []; for (let i = 0; i < s.length; i += CHUNK) parts.push(s.slice(i, i + CHUNK));
+  if (parts.length > MAXC) {   // слишком много — сокращаем историю дней
+    const keep = Object.keys(P.days).sort().slice(-14); const d = {}; keep.forEach(k => d[k] = P.days[k]); P.days = d;
+  }
+  try {
+    parts.forEach((p, i) => TG.CloudStorage.setItem("p_" + i, p, () => {}));
+    TG.CloudStorage.setItem("p_n", String(parts.length), () => {});
+  } catch (e) {}
+}
+async function loadP() {
+  const a = lsGet(), b = await cloudGet();
+  let p = [a, b].filter(x => x && x.v === 1).sort((x, y) => (y.ts || 0) - (x.ts || 0))[0] || freshP();
+  p = Object.assign(freshP(), p);
+  // Первый запуск: продолжаем с темы, где ребёнок сейчас в боте (?l=9 в адресе кнопки)
+  const l = parseInt(URLP.get("l") || "0", 10);
+  if (!p.ts && l > 1 && l <= DATA.lessons.length) {
+    p.lesson = l;
+    DATA.lessons.filter(x => x.id < l).forEach(x => { p.done.push(x.id); x.words.forEach(w => p.words[w.en] = { ok: 1, miss: 0, last: today() }); });
+  }
+  return p;
+}
+
+/* ---------- слова ---------- */
+function lessonById(id) { return DATA.lessons.find(l => l.id === id); }
+function poolItems() {
+  const ids = new Set(P.done.concat([P.lesson])), out = [], seen = new Set();
+  const add = w => { if (w && !seen.has(w.en)) { seen.add(w.en); out.push(w); } };
+  DATA.lessons.forEach(l => { if (ids.has(l.id)) { l.words.forEach(add); if (P.extra[l.id]) l.extra.forEach(add); } });
+  Object.keys(P.words).forEach(en => add(ALL[en]));
+  return out;
+}
+function poolPhrases() {
+  const ids = new Set(P.done.concat([P.lesson]));
+  return DATA.lessons.filter(l => ids.has(l.id)).flatMap(l => l.phrases);
+}
+function record(item, ok) {
+  if (!item) { S.streak = ok ? S.streak + 1 : 0; return; }
+  const w = P.words[item.en] || (P.words[item.en] = { ok: 0, miss: 0, last: "" });
+  if (ok) w.ok++; else w.miss++;
+  w.last = today();
+  if (S.results[item.en] !== false) S.results[item.en] = ok;   // промашка в занятии важнее
+  S.streak = ok ? S.streak + 1 : 0;
+  showFinish();
+}
+function learnedCount() { return Object.values(P.words).filter(w => w.ok >= 1).length; }
+function addStars(n) { P.days[today()] = (P.days[today()] || 0) + n; save(); }
+function distract(target, cands, n, key) {
+  key = key || "en";
+  const bad = c => c.en === target.en || ruShort(c.ru) === ruShort(target.ru) || (c.em && c.em === target.em) || c[key] === target[key];
+  let out = shuffle(cands.filter(c => !bad(c)));
+  const uniq = []; const seen = new Set();
+  out.forEach(c => { const k = key === "ru" ? ruShort(c.ru) : c[key]; if (!seen.has(k)) { seen.add(k); uniq.push(c); } });
+  if (uniq.length < n) {
+    shuffle(Object.values(ALL).filter(c => !bad(c) && !seen.has(key === "ru" ? ruShort(c.ru) : c[key]))).forEach(c => { if (uniq.length < n) { seen.add(key === "ru" ? ruShort(c.ru) : c[key]); uniq.push(c); } });
+  }
+  return uniq.slice(0, n);
+}
+
+/* ---------- озвучка ---------- */
+let VOICE = null;
+function findVoice() {
+  if (!("speechSynthesis" in window)) return;
+  let vs = []; try { vs = speechSynthesis.getVoices() || []; } catch (e) {}
+  VOICE = vs.find(v => /en[-_]GB/i.test(v.lang)) || vs.find(v => /en[-_]US/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || null;
+}
+if ("speechSynthesis" in window) { findVoice(); try { speechSynthesis.addEventListener("voiceschanged", findVoice); } catch (e) {} }
+function speak(text, quiet) {
+  if (!text) return false;
+  if (!VOICE) {
+    if (!quiet) toast('В этом телефоне нет английского голоса 😔<br>Послушать слова можно в <b>чате с Мисс Лили</b>: нажми 🔊 Звук.');
+    return false;
+  }
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.voice = VOICE; u.lang = VOICE.lang; u.rate = 0.85;
+    speechSynthesis.speak(u);
+  } catch (e) { return false; }
+  return true;
+}
+
+/* ---------- экран и кнопки ---------- */
+let ACTS = {}, onBack = null, TIMER = null;
+function stopTimer() { if (TIMER) { clearInterval(TIMER); TIMER = null; } }
+function startTimer(fn) { stopTimer(); TIMER = setInterval(fn, 1000); }
+function render(html, acts, back) {
+  try { speechSynthesis.cancel(); } catch (e) {}
+  ACTS = acts || {}; onBack = back || null;
+  $app.innerHTML = html;
+  window.scrollTo(0, 0);
+  if (IN_TG && TG.BackButton) { try { back ? TG.BackButton.show() : TG.BackButton.hide(); } catch (e) {} }
+  showFinish();
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b || b.disabled) return;
+  const name = b.dataset.act, arg = b.dataset.arg;
+  if (name === "finish") return finishSession();
+  if (name === "back") return onBack ? onBack() : home();
+  if (name === "say") return speak(b.dataset.text);
+  if (ACTS[name]) ACTS[name](arg, b);
+});
+if (IN_TG && TG.BackButton) { try { TG.BackButton.onClick(() => (onBack ? onBack() : home())); } catch (e) {} }
+const sayBtn = (text, label) => `<button class="say" data-act="say" data-text="${esc(text)}">🔊 ${label || "Послушать"}</button>`;
+const topBar = (k, n, extra) => `<div class="top"><button class="back" data-act="back" aria-label="Назад">←</button>
+  <div class="prog">${extra || (k + " / " + n)}<div class="bar"><i style="width:${n ? Math.round(100 * k / n) : 0}%"></i></div></div>
+  <div class="streak">🔥 ${S.streak}</div></div>`;
+const coach = text => `<div class="coach"><div class="avatar sm">👩🏼‍🦰</div><div class="bubble" id="say">${text}</div></div>`;
+function hideHint() { const h = document.querySelector(".hint"); if (h) h.remove(); }
+function setCoach(text) { const b = document.getElementById("say"); if (b) b.innerHTML = text; }
+
+/* ---------- главный экран ---------- */
+function cups() {
+  const n = Math.min(5, P.days[today()] || 0);
+  return "☕".repeat(n) + "▫️".repeat(5 - n);
+}
+function home() {
+  stopTimer();
+  const L = lessonById(P.lesson) || DATA.lessons[0];
+  const name = kidName();
+  const allDone = P.done.length >= DATA.lessons.length && P.done.includes(P.lesson);
+  render(`
+    <div class="hdr"><div class="avatar">👩🏼‍🦰</div><div class="hb"><div class="name">MISS LILY</div>
+      <div class="bubble">Hello${name ? ", " + esc(name) : ""}! ☕ ${allDone ? "Все темы пройдены! Повторим?" : "Едем на автобусе в урок " + L.id + "?"}</div></div></div>
+    <div class="strip"><div class="row"><span>Чай дня</span><span class="cups">${cups()}</span></div>
+      <div class="bar"><i style="width:${Math.min(100, 20 * (P.days[today()] || 0))}%"></i></div></div>
+    <div class="grid">
+      <button class="card wide" data-act="lesson"><span class="em">🚌</span><span class="tx"><span>Урок ${L.id}</span><small>${esc(L.title)}</small></span></button>
+      <button class="card" data-act="games"><span class="em">🎮</span><span>Игры</span></button>
+      <button class="card" data-act="review"><span class="em">🔤</span><span>Повторить</span></button>
+      <button class="card" data-act="topics"><span class="em">🗺️</span><span>Темы</span><small>${P.done.length} из ${DATA.lessons.length}</small></button>
+      <button class="card" data-act="words"><span class="em">🎟️</span><span>Мои слова</span><small>${learnedCount()} ${plural(learnedCount(), "слово", "слова", "слов")}</small></button>
+      <button class="card wide navy" data-act="chat"><span class="em">💬</span><span>В чате: подруга, истории, голос</span></button>
+    </div>`, {
+    lesson: () => startLesson(P.lesson, "words"),
+    games: gamesMenu, review: startReview, topics: topicsScreen, words: wordsScreen, chat: chatScreen,
+  });
+}
+
+/* ---------- темы ---------- */
+function topicsScreen() {
+  stopTimer();
+  render(`${topBar(P.done.length, DATA.lessons.length, "Темы: " + P.done.length + " из " + DATA.lessons.length)}
+    <h1>Маршрут автобуса 🚌</h1>
+    <div class="list">${DATA.lessons.map(l => `<button class="item ${l.id === P.lesson ? "cur" : ""}" data-act="go" data-arg="${l.id}">
+      <span class="n">${l.id}</span><span>${esc(l.title)}</span><span class="st">${P.done.includes(l.id) ? "✅" : l.id === P.lesson ? "▶️" : ""}</span></button>`).join("")}</div>`,
+    { go: id => { P.lesson = +id; save(); startLesson(+id, "words"); } }, home);
+}
+
+/* ---------- мои слова ---------- */
+function wordsScreen() {
+  stopTimer();
+  const ids = new Set(P.done.concat([P.lesson]));
+  const rec = DATA.games.filter(g => P.records[g.key]).map(g => `<span class="chip">${g.emoji} ${esc(g.title)}: ${P.records[g.key]}</span>`).join("");
+  render(`${topBar(0, 0, "Знаю слов: " + learnedCount())}
+    <h1>Мои слова 🎟️</h1><p class="muted">⭐ — слово уже получается. Нажми на слово, чтобы послушать.</p>
+    ${DATA.lessons.filter(l => ids.has(l.id)).map(l => `<div class="list"><div class="ttl" style="font-size:22px">${l.id}. ${esc(l.title)}</div>
+      <div class="chips">${l.words.concat(P.extra[l.id] ? l.extra : []).map(w => {
+        const s = P.words[w.en]; return `<button class="chip ${s && s.ok >= 1 ? "got" : ""}" data-act="say" data-text="${esc(w.en)}">${w.em} ${esc(w.en)} ${s && s.ok >= 2 ? "⭐" : ""}</button>`; }).join("")}</div></div>`).join("")}
+    ${rec ? `<div class="ttl" style="font-size:22px">Рекорды 🏆</div><div class="chips">${rec}</div>` : ""}`, {}, home);
+}
+
+/* ---------- что осталось в чате ---------- */
+function chatScreen() {
+  stopTimer();
+  const chat = DATA.games.filter(g => g.where === "chat");
+  render(`${topBar(0, 0, "В чате с Мисс Лили")}
+    ${coach("Там, где надо <b>говорить голосом</b> или болтать, я жду тебя в чате! 💬")}
+    <div class="list">
+      <div class="item">👧 Подруга из другой страны — болтаем по-английски</div>
+      ${chat.map(g => `<div class="item">${g.emoji} ${esc(g.title)}</div>`).join("")}
+      <div class="item">🎤 Любой вопрос голосом: «Как сказать…?»</div>
+    </div>
+    <button class="btn navy" data-act="go">💬 Перейти в чат</button>`,
+    { go: () => { if (hasResults()) finishSession(); else if (IN_TG) TG.close(); else location.href = BOT_LINK; } }, home);
+}
+
+/* ============================================================
+   ЗАДАНИЕ С ВАРИАНТАМИ — общий движок
+   Подсказка есть до ответа; после первой промашки — подсказка
+   про слово этого задания; ответ — только после второй.
+   ============================================================ */
+function ask(c) {
+  // c: k,n,top, prompt, pic, picClass, say, options[{label,val,em,desc}], answer, item, hint, reveal, next(ok), oneCol, small
+  let tries = 0, over = false;
+  const long = c.options.some(o => String(o.label).length > 9);
+  const opts = c.options.map((o, i) => `<button class="opt ${long || c.small ? "small" : ""}" data-act="pick" data-arg="${i}" data-hint="${esc(o.em || "")}">${o.showEm && o.em ? `<span class="oem">${o.em}</span>` : ""}${esc(o.label)}</button>`).join("");
+  render(`${c.top || topBar(c.k, c.n)}
+    ${coach(c.prompt)}
+    <div class="stage">${c.pic ? `<div class="pic ${c.picClass || ""}">${c.pic}</div>` : ""}${c.say ? sayBtn(c.say) : ""}</div>
+    <div class="opts ${long || c.oneCol ? "one" : ""}">${opts}</div>
+    ${c.hint ? `<button class="hint" data-act="hint">💡 Подсказка</button>` : ""}
+    <div id="nextbox"></div>`, {
+    hint: () => { if (!over) setCoach("💡 " + c.hint); },
+    pick: (i, b) => {
+      if (over) return;
+      const o = c.options[+i];
+      if (o.val === c.answer) {
+        over = true; b.classList.add("right"); haptic("success"); hideHint();
+        record(c.item, tries === 0);
+        setCoach(pick(PRAISE) + (c.praise ? " " + c.praise : ""));
+        speak(c.say || c.sayAfter || "", true);
+        setTimeout(() => c.next(tries === 0), 1100);
+        return;
+      }
+      tries++; b.classList.add("tried"); b.disabled = true; haptic("warning");
+      if (tries === 1) {
+        setCoach("Почти! Давай проверим: " + (o.desc || esc(o.label)) + (c.hint ? ". " + c.hint : ""));
+      } else {
+        over = true; record(c.item, false); hideHint();
+        document.querySelectorAll(".opt").forEach((x, j) => { x.disabled = true; if (c.options[j].val === c.answer) x.classList.add("right"); });
+        setCoach("Смотри: " + c.reveal + " Запомним! 💪");
+        speak(c.say || c.sayAfter || "", true);
+        document.getElementById("nextbox").innerHTML = `<button class="btn" data-act="nx">Дальше ▶</button>`;
+        ACTS.nx = () => c.next(false);
+      }
+    },
+  }, c.back || home);
+  if (c.say && c.autoSay) setTimeout(() => speak(c.say, true), 300);
+}
+
+const enLine = w => `<b>${esc(w.en)}</b> [${esc(w.tr)}] — ${esc(ruShort(w.ru))}${w.em ? " " + w.em : ""}`;
+function letterHint(w) { return `слово начинается на «${esc(w.en[0].toUpperCase())}», в нём ${w.en.replace(/ /g, "").length} ${plural(w.en.replace(/ /g, "").length, "буква", "буквы", "букв")}`; }
+function plural(n, a, b, c) { n = Math.abs(n) % 100; const m = n % 10; return n > 10 && n < 20 ? c : m > 1 && m < 5 ? b : m === 1 ? a : c; }
+
+// «Как по-английски …?» — видна картинка и русское слово, выбираем английское
+function askEn(w, pool, k, n, next, back) {
+  const opts = shuffle([w].concat(distract(w, pool, 3, "en"))).map(x => ({ label: x.en, val: x.en, em: x.em, desc: enLine(x) }));
+  ask({ k, n, item: w, back, next, answer: w.en,
+    prompt: `Как по-английски <b>«${esc(ruShort(w.ru))}»</b>?`,
+    pic: w.em || esc(ruShort(w.ru)), picClass: w.em ? "" : "txt ru",
+    options: opts, hint: "Подсказка: " + letterHint(w), reveal: enLine(w) + ".", sayAfter: w.en, praise: `<b>${esc(w.en)}</b> [${esc(w.tr)}]` });
+}
+// «Что значит …?» — видно и слышно английское слово, выбираем перевод
+function askRu(w, pool, k, n, next, back) {
+  const opts = shuffle([w].concat(distract(w, pool, 3, "ru"))).map(x => ({ label: ruShort(x.ru), val: x.en, em: x.em, showEm: true, desc: enLine(x) }));
+  ask({ k, n, item: w, back, next, answer: w.en, autoSay: true,
+    prompt: `Что значит <b>${esc(w.en)}</b>?`,
+    pic: esc(w.en), picClass: "txt", say: w.en, options: opts, small: true,
+    hint: `Подсказка: <b>${esc(w.en)}</b> звучит как [${esc(w.tr)}]` + (w.em ? ", а на картинке это " + w.em : ""), reveal: enLine(w) + "." });
+}
+
+/* ---------- собери фразу ---------- */
+function tokensOf(en) { return en.replace(/[.!?]+$/, "").split(/\s+/); }
+function buildPhrase(p, k, n, next, back, top) {
+  const right = tokensOf(p.en);
+  let bank = shuffle(right.map((t, i) => ({ t, i })));
+  if (bank.map(x => x.t).join(" ") === right.join(" ") && right.length > 1) bank.push(bank.shift());
+  let line = [], tries = 0;
+  const item = { en: p.en, tr: p.tr, ru: p.ru, em: "" };
+  function draw() {
+    render(`${top || topBar(k, n)}
+      ${coach(`Собери фразу: <b>«${esc(p.ru)}»</b>`)}
+      <div class="answer">${line.map((x, j) => `<button class="tok" data-act="out" data-arg="${j}">${esc(x.t)}</button>`).join("") || '<span class="muted">нажимай на слова по порядку 👇</span>'}</div>
+      <div class="tokens">${bank.map((x, j) => `<button class="tok" data-act="in" data-arg="${j}">${esc(x.t)}</button>`).join("")}</div>
+      <button class="hint" data-act="hint">💡 Подсказка</button>
+      <div id="nextbox"></div>`, {
+      in: j => { line.push(bank.splice(+j, 1)[0]); draw(); if (!bank.length) check(); },
+      out: j => { bank.push(line.splice(+j, 1)[0]); draw(); },
+      hint: () => setCoach(`💡 Фраза начинается с <b>«${esc(right[0])}»</b>, в ней ${right.length} ${plural(right.length, "слово", "слова", "слов")}.`),
+    }, back || home);
+  }
+  function check() {
+    if (line.map(x => x.t).join(" ") === right.join(" ")) {
+      haptic("success"); record(item, tries === 0);
+      setCoach(pick(PRAISE) + ` <b>${esc(p.en)}</b> [${esc(p.tr)}]`); speak(p.en, true);
+      setTimeout(() => next(tries === 0), 1400); return;
+    }
+    tries++; haptic("warning");
+    if (tries === 1) {
+      setTimeout(() => { bank = shuffle(bank.concat(line)); line = []; draw();
+        setCoach(`Почти! Давай проверим: фраза начинается с <b>«${esc(right[0])}»</b>${right.length > 2 ? ", потом <b>«" + esc(right[1]) + "»</b>" : ""}. Попробуй ещё!`); }, 700);
+    } else {
+      record(item, false);
+      setCoach(`Смотри: <b>${esc(p.en)}</b> [${esc(p.tr)}] — ${esc(p.ru)} Запомним! 💪`); speak(p.en, true);
+      document.querySelectorAll(".tok").forEach(x => x.disabled = true);
+      document.getElementById("nextbox").innerHTML = `<button class="btn" data-act="nx">Дальше ▶</button>`;
+      ACTS.nx = () => next(false);
+    }
+  }
+  draw();
+}
+
+/* ============================================================
+   УРОК: знакомство со словами по два → проверка → фразы
+   ============================================================ */
+function introCard(w, k, n, next, back, isPhrase) {
+  render(`${topBar(k, n)}
+    ${coach(isPhrase ? "Новая фраза! Послушай и повтори вслух 🗣" : "Новое слово! Послушай и скажи вслух 🗣")}
+    <div class="stage">${w.em && !isPhrase ? `<div class="pic">${w.em}</div>` : ""}
+      <div class="word" style="${isPhrase ? "font-size:34px" : ""}">${esc(w.en)}</div>
+      <div class="tr">[${esc(w.tr)}]</div><div class="ru">${esc(w.ru)}</div>${sayBtn(w.en)}</div>
+    <button class="btn" data-act="nx">Дальше ▶</button>`, { nx: next }, back);
+  setTimeout(() => speak(w.en, true), 350);
+}
+function startLesson(id, part) {
+  stopTimer();
+  const L = lessonById(id); if (!L) return home();
+  const items = part === "extra" ? L.extra : L.words;
+  const pool = items.concat(poolItems());
+  const steps = [];
+  for (let i = 0; i < items.length; i += 2) {
+    const pair = items.slice(i, i + 2);
+    pair.forEach(w => steps.push(["intro", w]));
+    pair.forEach(w => steps.push(["en", w]));
+  }
+  shuffle(items).forEach(w => steps.push(["ru", w]));
+  if (part === "words") L.phrases.forEach(p => { steps.push(["phrase", p]); const n = tokensOf(p.en).length; if (n >= 2 && n <= 7) steps.push(["build", p]); });
+  let i = 0;
+  const back = () => home();
+  function go() {
+    if (i >= steps.length) return lessonDone(L, part);
+    const [t, w] = steps[i++], k = i, n = steps.length;
+    if (t === "intro") introCard(w, k, n, go, back);
+    else if (t === "phrase") introCard(w, k, n, go, back, true);
+    else if (t === "en") askEn(w, pool, k, n, go, back);
+    else if (t === "ru") askRu(w, pool, k, n, go, back);
+    else buildPhrase(w, k, n, go, back);
+  }
+  go();
+}
+function lessonDone(L, part) {
+  if (!P.done.includes(L.id)) P.done.push(L.id);
+  if (part === "extra") P.extra[L.id] = true;
+  const next = DATA.lessons.find(l => l.id > L.id && !P.done.includes(l.id));
+  if (part === "words" && L.id === P.lesson && next) P.lesson = next.id;
+  if (!S.lessons.includes(L.id)) S.lessons.push(L.id);
+  addStars(2);
+  const canExtra = part === "words" && L.extra.length && !P.extra[L.id];
+  render(`<div class="big">🎉☕☕</div>
+    <h1 class="center">Тема «${esc(L.title)}» пройдена!</h1>
+    ${coach("Well done! Ты молодец! " + (canExtra ? "Хочешь ещё слов по этой теме?" : "Поехали дальше?"))}
+    ${canExtra ? `<button class="btn navy" data-act="extra">➕ Ещё ${L.extra.length} ${plural(L.extra.length, "слово", "слова", "слов")} по теме</button>` : ""}
+    ${next ? `<button class="btn" data-act="next">🚌 Урок ${next.id}: ${esc(next.title)}</button>` : ""}
+    <button class="btn ghost" data-act="home">🏠 На главную</button>`, {
+    extra: () => startLesson(L.id, "extra"), next: () => startLesson(next.id, "words"), home,
+  }, home);
+}
+
+/* ---------- повторить ---------- */
+function startReview() {
+  stopTimer();
+  const pool = poolItems();
+  if (pool.length < 4) { toast("Сначала пройди первый урок 🚌"); return startLesson(P.lesson, "words"); }
+  const score = w => { const s = P.words[w.en] || { ok: 0, miss: 0, last: "" }; return (s.miss - s.ok) * 10 + (s.last ? 0 : 5) + Math.random() * 3 - (s.last === today() ? 4 : 0); };
+  const list = pool.slice().sort((a, b) => score(b) - score(a)).slice(0, 8);
+  let i = 0, ok = 0;
+  (function go(prevOk) {
+    if (prevOk) ok++;
+    if (i >= list.length) { addStars(1); return endScreen("🔤 Повторение", `${ok} из ${list.length} с первого раза`, null, startReview); }
+    const w = list[i++];
+    (i % 2 ? askEn : askRu)(w, pool, i, list.length, go, home);
+  })();
+}
+
+/* ============================================================
+   ИГРЫ (правила — как в боте, games.py)
+   ============================================================ */
+function gameInfo(key) { return DATA.games.find(g => g.key === key); }
+function gamesMenu() {
+  stopTimer();
+  const app = DATA.games.filter(g => g.where === "app");
+  render(`${topBar(0, 0, "Игры")}
+    <h1>Во что сыграем? 🎮</h1>
+    <div class="grid">${app.map(g => `<button class="card" data-act="play" data-arg="${g.key}"><span class="em">${g.emoji}</span><span>${esc(g.title)}</span>${P.records[g.key] ? `<small>🏆 ${P.records[g.key]}</small>` : ""}</button>`).join("")}
+      <button class="card wide navy" data-act="chat"><span class="em">💬</span><span>Голосовые игры и истории — в чате</span></button></div>`,
+    { play: k => GAMES[k](), chat: chatScreen }, home);
+}
+function endScreen(title, line, gameKey, again, score) {
+  stopTimer();
+  let rec = "";
+  if (gameKey) {
+    S.games.push([gameKey, score || 0]);
+    const best = P.records[gameKey] || 0;
+    if ((score || 0) > best) { P.records[gameKey] = score; rec = `<p class="center" style="font-size:24px">🏆 Новый рекорд!</p>`; }
+    else if (best) rec = `<p class="center muted">Рекорд: ${best}</p>`;
+    addStars(1);
+  }
+  showFinish();
+  render(`<div class="big">🏁</div><h1 class="center">${esc(title)}</h1>
+    ${coach(`${line} ${pick(["Супер! ☕", "Well done! 👏", "Ты молодец! 🎉"])}`)}${rec}
+    <button class="btn" data-act="again">🔄 Ещё раз</button>
+    <button class="btn navy" data-act="games">🎮 Другие игры</button>
+    <button class="btn ghost" data-act="home">🏠 На главную</button>`, { again, games: gamesMenu, home }, home);
+}
+function needWords(min) {
+  const p = poolItems().filter(w => !/\s/.test(w.en));
+  if (p.length < min) { toast("Для этой игры нужно больше слов. Пройди ещё урок 🚌"); gamesMenu(); return null; }
+  return p;
+}
+function groupOf(en) { for (const [g, ws] of Object.entries(DATA.groups)) if (ws.includes(en)) return g; return null; }
+function timerLine(end) { const s = Math.max(0, Math.round((end - Date.now()) / 1000)); return "⏱ " + Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+
+const GAMES = {
+  /* 🔍 Что лишнее? */
+  odd_one_out() {
+    const pool = needWords(6); if (!pool) return;
+    const inPool = new Set(pool.map(w => w.en));
+    const good = Object.entries(DATA.groups).map(([g, ws]) => [g, ws.filter(w => inPool.has(w))]).filter(([, ws]) => ws.length >= 3);
+    if (good.length < 2) { toast("Пока мало слов из разных тем. Пройди ещё урок 🚌"); return gamesMenu(); }
+    const R = 6; let r = 0, score = 0;
+    (function go(ok) {
+      if (ok) score++;
+      if (r >= R) return endScreen("Что лишнее?", `Угадано: ${score} из ${R}.`, "odd_one_out", GAMES.odd_one_out, score);
+      r++;
+      // слово может быть в двух группах (bear — и зверь, и игрушка): такие не берём
+      let a, b, three, odd;
+      for (let t = 0; t < 20; t++) {
+        [a, b] = shuffle(good);
+        const inB = new Set(DATA.groups[b[0]]), inA = new Set(DATA.groups[a[0]]);
+        const mainOk = a[1].filter(w => !inB.has(w)), oddOk = b[1].filter(w => !inA.has(w));
+        if (mainOk.length >= 3 && oddOk.length) { three = shuffle(mainOk).slice(0, 3); odd = pick(oddOk); break; }
+      }
+      if (!odd) { toast("Пока мало слов из разных тем. Пройди ещё урок 🚌"); return gamesMenu(); }
+      const oi = ALL[odd];
+      const opts = shuffle(three.concat([odd])).map(en => ({ label: en, val: en, em: ALL[en].em, desc: `<b>${esc(en)}</b> — ${esc(ruShort(ALL[en].ru))} ${ALL[en].em}, это ${a[0]}` }));
+      ask({ k: r, n: R, item: oi, answer: odd, next: go, back: gamesMenu, options: opts,
+        prompt: "Какое слово <b>лишнее</b>? Три слова — из одной компании 🔍",
+        hint: `Подсказка: три слова — это <b>${a[0]}</b> ${DATA.group_emoji[a[0]] || ""}. Найди то, что не ${a[0]}`,
+        reveal: `лишнее — ${enLine(oi)}: остальные — ${a[0]}.` });
+    })();
+  },
+
+  /* 🔥 Горячо–холодно */
+  hot_cold() {
+    const pool = needWords(6); if (!pool) return;
+    const withGroup = pool.filter(w => groupOf(w.en));
+    if (withGroup.length < 4) { toast("Пока мало слов. Пройди ещё урок 🚌"); return gamesMenu(); }
+    const R = 4; let r = 0, score = 0;
+    (function round() {
+      if (r >= R) return endScreen("Горячо–холодно", `Отгадано: ${score} из ${R}.`, "hot_cold", GAMES.hot_cold, score);
+      r++;
+      const sec = pick(withGroup), g = groupOf(sec.en);
+      const same = shuffle(withGroup.filter(w => w.en !== sec.en && groupOf(w.en) === g)).slice(0, 2);
+      const other = shuffle(pool.filter(w => w.en !== sec.en && groupOf(w.en) !== g)).slice(0, 5 - same.length);
+      const opts = shuffle([sec].concat(same, other));
+      let step = 1, over = false;
+      const hints = [];
+      const hintFor = s => {
+        if (s === 1) return g ? `Это <b>${g}</b> ${DATA.group_emoji[g] || ""}` : "Загадала слово!";
+        if (s === 2) return `В этом слове ${sec.en.length} ${plural(sec.en.length, "буква", "буквы", "букв")}`;
+        if (s === 3) return `Начинается на букву <b>${esc(sec.en[0].toUpperCase())}</b>`;
+        return sec.tr ? `Звучит как [${esc(sec.tr)}]` : `Заканчивается на <b>${esc(sec.en.slice(-1).toUpperCase())}</b>`;
+      };
+      hints.push(hintFor(1));
+      render(`${topBar(r, R)}
+        ${coach("Я загадала слово 🤫 Угадай! " + hints[0])}
+        <div class="stage"><div class="pic">❓</div></div>
+        <div class="opts">${opts.map((o, i) => `<button class="opt" data-act="g" data-arg="${i}" data-hint="${esc(o.em || "")}">${esc(o.en)}</button>`).join("")}</div>
+        <div id="nextbox"></div>`, {
+        g: (i, b) => {
+          if (over) return;
+          const o = opts[+i];
+          if (o.en === sec.en) {
+            over = true; b.classList.add("right"); haptic("success"); record(sec, step === 1); score++;
+            document.querySelector(".pic").textContent = sec.em || "🎉";
+            setCoach(`ДА! 🎉 Это было ${enLine(sec)}!`); speak(sec.en, true);
+            setTimeout(round, 1600); return;
+          }
+          b.classList.add("tried"); b.disabled = true; haptic("warning");
+          const hot = groupOf(o.en) === g ? "🔥 Горячо! Это из той же компании!" : `🧊 Холодно! ${esc(o.en)} — это ${esc(ruShort(o.ru))}, а я загадала не ${groupOf(o.en) || "это"}.`;
+          step++;
+          if (step <= DATA.hot_cold_steps) { hints.push(hintFor(step)); setCoach(hot + " Подсказка: " + hints[hints.length - 1]); }
+          else {
+            over = true; record(sec, false);
+            document.querySelectorAll(".opt").forEach((x, j) => { x.disabled = true; if (opts[j].en === sec.en) x.classList.add("right"); });
+            document.querySelector(".pic").textContent = sec.em || "💡";
+            setCoach(`Смотри: я загадала ${enLine(sec)}. Запомним! 💪`); speak(sec.en, true);
+            document.getElementById("nextbox").innerHTML = `<button class="btn" data-act="nx">Дальше ▶</button>`;
+            ACTS.nx = round;
+          }
+        },
+      }, gamesMenu);
+    })();
+  },
+
+  /* 🧩 Собери фразу */
+  build_phrase() {
+    const ph = shuffle(poolPhrases().filter(p => { const n = tokensOf(p.en).length; return n >= 2 && n <= 6; }));
+    if (ph.length < 2) { toast("Фразы появятся после первого урока 🚌"); return gamesMenu(); }
+    const list = ph.slice(0, 5); let r = 0, score = 0;
+    (function go(ok) {
+      if (ok) score++;
+      if (r >= list.length) return endScreen("Собери фразу", `Собрано с первого раза: ${score} из ${list.length}.`, "build_phrase", GAMES.build_phrase, score);
+      r++; buildPhrase(list[r - 1], r, list.length, go, gamesMenu);
+    })();
+  },
+
+  /* ⚡ Переводчик */
+  fast_translate() {
+    const pool = needWords(5); if (!pool) return;
+    const R = DATA.translate_rounds, end = Date.now() + (gameInfo("fast_translate").minutes || 3) * 60000;
+    const list = shuffle(pool).slice(0, R); while (list.length < R) list.push(pick(pool));
+    let r = 0, score = 0;
+    const stop = stopTimer;
+    startTimer(() => { const p = document.querySelector(".prog"); if (Date.now() > end) { stop(); endScreen("Переводчик", `Время вышло! Счёт: ${score}.`, "fast_translate", GAMES.fast_translate, score); } else if (p && p.firstChild) p.firstChild.nodeValue = `${r} / ${R} · ${timerLine(end)}`; });
+    (function go(ok) {
+      if (ok) score++;
+      if (r >= R) { stop(); return endScreen("Переводчик", `Счёт: ${score} из ${R}.`, "fast_translate", GAMES.fast_translate, score); }
+      r++;
+      askEn(list[r - 1], pool, r, R, go, () => { stop(); gamesMenu(); });
+    })();
+  },
+
+  /* 🤔 Да или нет (утверждения строит программа из фактов games.py) */
+  yes_no() {
+    const inPool = new Set(poolItems().map(w => w.en));
+    const Y = DATA.yesno, tr = en => ALL[en] ? ruShort(ALL[en].ru) : en;
+    const v = [];
+    Object.entries(Y.colour).forEach(([thing, col]) => {
+      if (!inPool.has(col)) return;
+      v.push({ q: `Is ${thing} ${col}?`, a: true, ru: `${tr(thing)} — ${tr(col)}?`, em: DATA.emoji[thing] || "", why: `Да, ${thing} — ${tr(col)}` });
+      const wrong = shuffle(Object.values(Y.colour).filter(c => c !== col && inPool.has(c)))[0];
+      if (wrong) v.push({ q: `Is ${thing} ${wrong}?`, a: false, ru: `${tr(thing)} — ${tr(wrong)}?`, em: DATA.emoji[thing] || "", why: `Нет, ${thing} — ${tr(col)}` });
+    });
+    Object.entries(Y.can).forEach(([an, acts]) => { if (inPool.has(an)) acts.forEach(act => v.push({ q: `Can a ${an} ${act}?`, a: true, ru: `${tr(an)} умеет ${Y.action_ru[act]}?`, em: DATA.emoji[an] || "", why: `Да, ${tr(an)} умеет ${Y.action_ru[act]}` })); });
+    Object.entries(Y.cannot).forEach(([an, acts]) => { if (inPool.has(an)) acts.forEach(act => v.push({ q: `Can a ${an} ${act}?`, a: false, ru: `${tr(an)} умеет ${Y.action_ru[act]}?`, em: DATA.emoji[an] || "", why: `Нет, ${tr(an)} не умеет ${Y.action_ru[act]}` })); });
+    if (v.length < 4) { toast("Эта игра откроется после тем «Цвета» и «Животные» 🚌"); return gamesMenu(); }
+    const R = Math.min(8, v.length), list = shuffle(v).slice(0, R);
+    let r = 0, score = 0;
+    (function go(ok) {
+      if (ok) score++;
+      if (r >= R) return endScreen("Да или нет", `Верных ответов: ${score} из ${R}.`, "yes_no", GAMES.yes_no, score);
+      const x = list[r++];
+      ask({ k: r, n: R, item: null, answer: x.a ? "yes" : "no", next: go, back: gamesMenu, autoSay: true, say: x.q,
+        prompt: "Yes или no? 🤔", pic: (x.em ? x.em + "<br>" : "") + `<span style="font-size:36px">${esc(x.q)}</span>`, picClass: x.em ? "" : "txt",
+        options: [{ label: "yes ✅", val: "yes", desc: "" }, { label: "no ❌", val: "no", desc: "" }].map(o => Object.assign(o, { desc: `${esc(x.q)} — это «${esc(x.ru)}»` })),
+        hint: `Подсказка: <b>${esc(x.q)}</b> — это «${esc(x.ru)}»`, reveal: esc(x.why) + "!" });
+    })();
+  },
+
+  /* 🧠 Запомни три */
+  remember_three() {
+    const pool = needWords(8); if (!pool) return;
+    const R = 3; let r = 0, score = 0;
+    round();
+    function round() {
+      if (r >= R) return endScreen("Запомни три", `Вспомнила все три: ${score} ${plural(score, "раз", "раза", "раз")} из ${R}.`, "remember_three", GAMES.remember_three, score);
+      r++;
+      const three = shuffle(pool).slice(0, 3), others = distract(three[0], pool.filter(w => !three.includes(w)), 5);
+      render(`${topBar(r, R)}
+        ${coach("Запомни три слова! 🧠 Нажми на слово — я его скажу.")}
+        <div class="list">${three.map(w => `<button class="item" data-act="say" data-text="${esc(w.en)}"><span style="font-size:36px">${w.em}</span><span style="font-size:36px">${esc(w.en)}</span><span class="st muted">${esc(ruShort(w.ru))}</span></button>`).join("")}</div>
+        <button class="btn" data-act="ready">Запомнила! ▶</button>`, {
+        ready: () => {
+          const n = 2 + Math.floor(Math.random() * 3);
+          render(`${topBar(r, R)}${coach("Отвлечёмся! Сколько тут чашек?")}
+            <div class="stage"><div class="pic" style="font-size:56px">${"☕".repeat(n)}</div></div>
+            <div class="opts">${[2, 3, 4].map(x => `<button class="opt" data-act="c" data-arg="${x}">${x}</button>`).join("")}</div>`,
+            { c: x => { setCoach(+x === n ? "Верно! ☕ А теперь…" : `Почти! Посчитаем вместе: их ${n}. А теперь…`); setTimeout(() => choose(three, others), 1100); } }, gamesMenu);
+        },
+      }, gamesMenu);
+    }
+    function choose(three, others) {
+      const opts = shuffle(three.concat(others)); let sel = new Set(), tries = 0;
+      const draw = () => {
+        render(`${topBar(r, R)}${coach(tries ? `Почти! Угадано ${[...sel].filter(i => three.includes(opts[i])).length} из 3. Подсказка: одно из слов начинается на «${esc(three.find((w, j) => !sel.has(opts.indexOf(w))).en[0].toUpperCase())}»` : "Какие три слова ты запомнила? Выбери три 👇")}
+          <div class="opts">${opts.map((w, i) => `<button class="opt small ${sel.has(i) ? "sel" : ""}" data-act="t" data-arg="${i}">${esc(w.en)}</button>`).join("")}</div>
+          <button class="btn" data-act="ok" ${sel.size === 3 ? "" : "disabled style=opacity:.5"}>Проверить ✔</button><div id="nextbox"></div>`, {
+          t: i => { i = +i; sel.has(i) ? sel.delete(i) : sel.size < 3 && sel.add(i); draw(); },
+          ok: () => {
+            const got = [...sel].filter(i => three.includes(opts[i])).length;
+            if (got === 3) { three.forEach(w => record(w, tries === 0)); if (tries === 0) score++; haptic("success"); setCoach("Память как у слона! 🐘"); setTimeout(round, 1300); return; }
+            tries++;
+            if (tries === 1) { [...sel].forEach(i => { if (!three.includes(opts[i])) sel.delete(i); }); draw(); return; }
+            three.forEach(w => record(w, false));
+            render(`${topBar(r, R)}${coach("Смотри, вот эти три: " + three.map(enLine).join(", ") + ". Запомним! 💪")}
+              <button class="btn" data-act="nx">Дальше ▶</button>`, { nx: round }, gamesMenu);
+          },
+        }, gamesMenu);
+      };
+      draw();
+    }
+  },
+
+  /* 👂 Что я сказала? */
+  what_did_i_say() {
+    const pool = needWords(5); if (!pool) return;
+    if (!VOICE) {
+      return render(`${topBar(0, 0, "Что я сказала?")}
+        ${coach("В этом телефоне нет английского голоса 😔 Эту игру можно сыграть <b>в чате</b>: кнопка «🎮 Игра» → «Что я сказала?» — там я пришлю голосовое.")}
+        <button class="btn navy" data-act="go">💬 Перейти в чат</button>`, { go: () => (IN_TG ? TG.close() : (location.href = BOT_LINK)) }, gamesMenu);
+    }
+    const R = 6, list = shuffle(pool).slice(0, R); let r = 0, score = 0;
+    (function go(ok) {
+      if (ok) score++;
+      if (r >= Math.min(R, list.length)) return endScreen("Что я сказала?", `Расслышано: ${score} из ${Math.min(R, list.length)}.`, "what_did_i_say", GAMES.what_did_i_say, score);
+      const w = list[r++];
+      const opts = shuffle([w].concat(distract(w, pool, 3, "ru"))).map(x => ({ label: ruShort(x.ru), val: x.en, em: x.em, showEm: true, desc: enLine(x) }));
+      ask({ k: r, n: Math.min(R, list.length), item: w, answer: w.en, next: go, back: gamesMenu, autoSay: true, small: true,
+        prompt: "Послушай 👂 Какое слово я сказала?", pic: "👂", say: w.en, options: opts,
+        hint: `Подсказка: слово начинается на «${esc(w.en[0].toUpperCase())}». Нажми 🔊 ещё раз`, reveal: `я сказала ${enLine(w)}.` });
+    })();
+  },
+
+  /* 🏃 Найди дома */
+  find_at_home() {
+    const inPool = new Set(poolItems().map(w => w.en)), F = DATA.find;
+    const quals = Object.keys(F.qualities), every = F.colours.concat(quals, F.things);
+    let picked = every.filter(w => inPool.has(w));
+    for (const w of quals.concat(F.colours, F.things)) { if (picked.length >= 8) break; if (!picked.includes(w)) picked.push(w); }
+    const info = w => ALL[w] ? { tr: ALL[w].tr, ru: ruShort(ALL[w].ru), em: ALL[w].em } : { tr: (F.qualities[w] || {}).tr || "", ru: (F.qualities[w] || {}).ru || w, em: "" };
+    const end = Date.now() + (gameInfo("find_at_home").minutes || 10) * 60000;
+    let deck = shuffle(picked), found = 0, n = 0;
+    const stop = stopTimer;
+    const finish = () => { stop(); endScreen("Найди дома", `Найдено вещей: ${found}.`, "find_at_home", GAMES.find_at_home, found); };
+    startTimer(() => { const p = document.querySelector(".prog"); if (Date.now() > end) finish(); else if (p && p.firstChild) p.firstChild.nodeValue = `Найдено: ${found} · ${timerLine(end)}`; });
+    (function task() {
+      if (!deck.length) deck = shuffle(picked);
+      const w = deck.pop(), x = info(w); n++;
+      const bold = `<b>${esc(w)}</b> [${esc(x.tr)}]`;
+      const text = F.templates[(n - 1) % F.templates.length].replace("{bold}", bold).replace("{ru}", esc(x.ru)).replace(/\*\*/g, "");
+      render(`${topBar(0, 0, `Найдено: ${found} · ${timerLine(end)}`)}
+        ${coach("Беги по квартире и найди вещь! 🏃 Я не вижу, что ты нашла, — просто нажми кнопку.")}
+        <div class="findtask">${x.em ? `<div style="font-size:56px">${x.em}</div>` : ""}${text}</div>
+        <div class="stage">${sayBtn(w)}</div>
+        <button class="btn green" data-act="yes">✅ Нашла!</button>
+        <div class="row2"><button class="btn ghost" data-act="skip">🔄 Другое</button><button class="btn navy" data-act="stop">🏁 Хватит</button></div>`, {
+        yes: () => { found++; if (ALL[w]) record(ALL[w], true); haptic("success"); toast(pick(PRAISE) + ` Скажи вслух: <b>${esc(w)}</b>!`, 1500); setTimeout(task, 900); },
+        skip: task, stop: finish,
+      }, () => { stop(); gamesMenu(); });
+      setTimeout(() => speak(w, true), 300);
+    })();
+  },
+};
+
+/* ============================================================
+   ЗАКОНЧИТЬ: итог занятия уходит боту (sendData).
+   Работает, только если приложение открыто кнопкой клавиатуры
+   «📱 Miss Lily» внизу чата. Иначе итог ждёт следующего раза.
+   ============================================================ */
+function hasResults() { return Object.keys(S.results).length || S.games.length || S.lessons.length || (P && P.pending); }
+function showFinish() { $finish.hidden = !(P && hasResults()); }
+function canSend() {
+  if (!IN_TG || !TG.sendData) return false;
+  try { return !(TG.initDataUnsafe && TG.initDataUnsafe.query_id); } catch (e) { return false; }
+}
+function payload() {
+  const pend = P.pending || { r: {}, g: [], l: [], m: 0 };
+  const r = Object.assign({}, pend.r); Object.entries(S.results).forEach(([w, ok]) => { if (r[w] !== false) r[w] = ok; });
+  return {
+    v: 1, lesson: P.lesson, done: P.done.slice(0, 20),
+    l: [...new Set(pend.l.concat(S.lessons))].slice(0, 20),
+    g: pend.g.concat(S.games).slice(-20),
+    r: Object.entries(r).slice(-60).map(([w, ok]) => [w, ok ? 1 : 0]),
+    m: pend.m + Math.round((Date.now() - S.started) / 60000),
+  };
+}
+function finishSession() {
+  stopTimer();
+  const d = payload();
+  if (canSend()) {
+    let json = JSON.stringify(d);
+    while (json.length > 4000 && d.r.length) { d.r.shift(); json = JSON.stringify(d); }
+    P.pending = null; save();
+    try { TG.sendData(json); return; } catch (e) { /* ниже — запасной путь */ }
+  }
+  P.pending = { r: Object.fromEntries(d.r.map(([w, ok]) => [w, !!ok])), g: d.g, l: d.l, m: d.m };
+  S.results = {}; S.games = []; S.lessons = []; S.started = Date.now();
+  save();
+  render(`<div class="big">☕</div><h1 class="center">Всё сохранено!</h1>
+    ${coach("Прогресс запомнила. Чтобы я рассказала маме, как прошло занятие, открой приложение кнопкой <b>«📱 Miss Lily»</b> внизу чата и нажми «✅ Закончить».")}
+    <button class="btn ghost" data-act="home">🏠 На главную</button>`, { home }, home);
+}
+
+/* ---------- запуск ---------- */
+(async function start() {
+  try {
+    const r = await fetch("data.json", { cache: "no-cache" });
+    DATA = await r.json();
+  } catch (e) {
+    $app.innerHTML = `<div class="bubble" style="margin-top:30vh">Ой, слова не загрузились 😔 Проверь интернет и открой ещё раз.</div>`;
+    return;
+  }
+  DATA.lessons.forEach(l => l.words.concat(l.extra).forEach(w => { ALL[w.en] = Object.assign({ lesson: l.id }, w); }));
+  P = await loadP();
+  save();
+  const go = URLP.get("go");
+  if (go === "games") gamesMenu(); else if (go === "words") wordsScreen(); else home();
+})();
+</script>
+</body>
+</html>
