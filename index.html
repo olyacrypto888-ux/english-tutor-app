@@ -81,6 +81,7 @@ html.dark .card.navy{border-top-color:#1a2547}
 .opts.one{grid-template-columns:1fr}
 .opt{min-height:78px;padding:8px 10px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:36px;font-weight:900;position:relative;background:var(--card);color:var(--ink);border:4px solid var(--line);border-radius:14px;box-shadow:0 6px 0 var(--line);text-align:center;line-height:1.1;word-break:break-word}
 .opt.small{font-size:26px}
+.opt.stack{flex-direction:column;gap:2px}
 .opt .oem{font-size:30px}
 .opt.tried{opacity:.55}
 .opt.tried:after{content:attr(data-hint);position:absolute;right:8px;top:4px;font-size:22px}
@@ -113,6 +114,17 @@ html.dark .card.navy{border-top-color:#1a2547}
 .finish{position:fixed;left:0;right:0;bottom:12px;display:flex;justify-content:center;z-index:5;padding:0 14px;pointer-events:none}
 .finish[hidden]{display:none}
 .finish .btn{max-width:452px;pointer-events:auto}
+/* 📒 тетрадь */
+.tile{min-width:56px;min-height:64px;padding:4px 10px;border-radius:14px;font-size:38px;font-weight:900;background:var(--card);color:var(--ink);border:3px solid var(--line);box-shadow:0 5px 0 var(--line)}
+.answer .tile{background:var(--win);color:#1d2b53}
+.answer .tile.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+.hl{color:var(--red);text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:5px}
+html.dark .hl{color:#ff8a9b} .pic .hl,.opt .hl{color:#c8102e}
+.gap{display:inline-block;min-width:60px;height:38px;border-bottom:6px solid var(--red);vertical-align:-4px;margin:0 6px}
+.item .bar{background:#cfd3e2} html.dark .item .bar{background:#3a4a7a}
+.item .grow{flex:1;min-width:0;line-height:1.2}
+.chips.big .chip{min-height:56px;display:inline-flex;align-items:center;padding:6px 16px;font-size:22px}
+.stamp{align-self:center;transform:rotate(-4deg);border:5px double var(--ok);color:var(--ok);border-radius:16px;padding:10px 18px;font-size:26px;font-weight:900;text-align:center}
 </style>
 </head>
 <body>
@@ -141,7 +153,7 @@ const $app = document.getElementById("app");
 const $finish = document.getElementById("finish");
 
 let DATA = null, ALL = {}, P = null;
-const S = { results: {}, games: [], lessons: [], started: Date.now(), streak: 0 };  // это занятие
+const S = { results: {}, games: [], lessons: [], wb: {}, started: Date.now(), streak: 0 };  // это занятие
 
 /* ---------- тема Telegram ---------- */
 function applyTheme() {
@@ -170,7 +182,7 @@ function haptic(kind) { if (!IN_TG) return; try { TG.HapticFeedback.notification
 
 /* ---------- прогресс: CloudStorage Telegram + запасной localStorage ---------- */
 const LS_KEY = "misslily_p1", CHUNK = 3000, MAXC = 10;
-function freshP() { return { v: 1, ts: 0, lesson: 1, done: [], extra: {}, words: {}, records: {}, days: {}, pending: null }; }
+function freshP() { return { v: 1, ts: 0, lesson: 1, done: [], extra: {}, words: {}, records: {}, days: {}, pending: null, wb: {}, wbs: [] }; }
 function cloudOk() { try { return !!(IN_TG && TG.CloudStorage && TG.isVersionAtLeast && TG.isVersionAtLeast("6.9")); } catch (e) { return false; } }
 function lsGet() { try { return JSON.parse(localStorage.getItem(LS_KEY) || "null"); } catch (e) { return null; } }
 function lsSet(s) { try { localStorage.setItem(LS_KEY, s); } catch (e) {} }
@@ -191,18 +203,28 @@ function cloudGet() {
 }
 function save() {
   P.ts = Date.now();
-  const s = JSON.stringify(P);
+  let s = JSON.stringify(P);
+  if (s.length > CHUNK * MAXC) {   // слишком много — сокращаем историю дней
+    const keep = Object.keys(P.days).sort().slice(-14); const d = {}; keep.forEach(k => d[k] = P.days[k]); P.days = d;
+    s = JSON.stringify(P);
+  }
   lsSet(s);
   if (!cloudOk()) return;
   const parts = []; for (let i = 0; i < s.length; i += CHUNK) parts.push(s.slice(i, i + CHUNK));
-  if (parts.length > MAXC) {   // слишком много — сокращаем историю дней
-    const keep = Object.keys(P.days).sort().slice(-14); const d = {}; keep.forEach(k => d[k] = P.days[k]); P.days = d;
-  }
+  if (parts.length > MAXC) return;   // облако не потянет — прогресс остаётся в localStorage
   try {
     parts.forEach((p, i) => TG.CloudStorage.setItem("p_" + i, p, () => {}));
     TG.CloudStorage.setItem("p_n", String(parts.length), () => {});
   } catch (e) {}
 }
+let _st = null;
+function saveSoon() {   // после каждого ответа: сразу в localStorage, в облако — не чаще раза в 1,5 с
+  P.ts = Date.now(); lsSet(JSON.stringify(P));
+  clearTimeout(_st); _st = setTimeout(() => { _st = null; save(); }, 1500);
+}
+function flushSave() { if (_st) { clearTimeout(_st); _st = null; save(); } }
+window.addEventListener("pagehide", flushSave);
+document.addEventListener("visibilitychange", () => { if (document.hidden) flushSave(); });
 async function loadP() {
   const a = lsGet(), b = await cloudGet();
   let p = [a, b].filter(x => x && x.v === 1).sort((x, y) => (y.ts || 0) - (x.ts || 0))[0] || freshP();
@@ -229,8 +251,13 @@ function poolPhrases() {
   const ids = new Set(P.done.concat([P.lesson]));
   return DATA.lessons.filter(l => ids.has(l.id)).flatMap(l => l.phrases);
 }
-function record(item, ok) {
+function record(item, ok, kind) {
   if (!item) { S.streak = ok ? S.streak + 1 : 0; return; }
+  if (item.wb) {   // слово тетради: свой прогресс (P.wb), в P.words не пишем
+    S.streak = ok ? S.streak + 1 : 0;
+    if (item.wb === 1) wbRecord(item.en, ok, kind);
+    showFinish(); return;
+  }
   const w = P.words[item.en] || (P.words[item.en] = { ok: 0, miss: 0, last: "" });
   if (ok) w.ok++; else w.miss++;
   w.last = today();
@@ -240,9 +267,11 @@ function record(item, ok) {
 }
 function learnedCount() { return Object.values(P.words).filter(w => w.ok >= 1).length; }
 function addStars(n) { P.days[today()] = (P.days[today()] || 0) + n; save(); }
+const ruStems = ru => ruShort(ru).toLowerCase().split(/[^а-яёa-z]+/).filter(t => t.length >= 3).map(t => t.slice(0, 3));
+function ruOverlap(a, b) { const sb = ruStems(b.ru); return ruStems(a.ru).some(x => sb.includes(x)); }
 function distract(target, cands, n, key) {
   key = key || "en";
-  const bad = c => c.en === target.en || ruShort(c.ru) === ruShort(target.ru) || (c.em && c.em === target.em) || c[key] === target[key];
+  const bad = c => c.en === target.en || ruShort(c.ru) === ruShort(target.ru) || ruOverlap(c, target) || (c.em && c.em === target.em) || c[key] === target[key];
   let out = shuffle(cands.filter(c => !bad(c)));
   const uniq = []; const seen = new Set();
   out.forEach(c => { const k = key === "ru" ? ruShort(c.ru) : c[key]; if (!seen.has(k)) { seen.add(k); uniq.push(c); } });
@@ -325,10 +354,11 @@ function home() {
       <button class="card" data-act="review"><span class="em">🔤</span><span>Повторить</span></button>
       <button class="card" data-act="topics"><span class="em">🗺️</span><span>Темы</span><small>${P.done.length} из ${DATA.lessons.length}</small></button>
       <button class="card" data-act="words"><span class="em">🎟️</span><span>Мои слова</span><small>${learnedCount()} ${plural(learnedCount(), "слово", "слова", "слов")}</small></button>
+      ${WB ? `<button class="card wide" data-act="wb"><span class="em">📒</span><span class="tx"><span>Тетрадь: исправляем тройки</span><small>${wbFlownCount(WB.all)} из ${WB.all.length} слов отлетают</small></span></button>` : ""}
       <button class="card wide navy" data-act="chat"><span class="em">💬</span><span>В чате: подруга, истории, голос</span></button>
     </div>`, {
     lesson: () => startLesson(P.lesson, "words"),
-    games: gamesMenu, review: startReview, topics: topicsScreen, words: wordsScreen, chat: chatScreen,
+    games: gamesMenu, review: startReview, topics: topicsScreen, words: wordsScreen, chat: chatScreen, wb: wbHome,
   });
 }
 
@@ -379,7 +409,8 @@ function ask(c) {
   // c: k,n,top, prompt, pic, picClass, say, options[{label,val,em,desc}], answer, item, hint, reveal, next(ok), oneCol, small
   let tries = 0, over = false;
   const long = c.options.some(o => String(o.label).length > 9);
-  const opts = c.options.map((o, i) => `<button class="opt ${long || c.small ? "small" : ""}" data-act="pick" data-arg="${i}" data-hint="${esc(o.em || "")}">${o.showEm && o.em ? `<span class="oem">${o.em}</span>` : ""}${esc(o.label)}</button>`).join("");
+  const stack = c.options.some(o => o.showEm && o.em);
+  const opts = c.options.map((o, i) => `<button class="opt ${long || c.small ? "small" : ""} ${stack ? "stack" : ""}" data-act="pick" data-arg="${i}" data-hint="${esc(o.em || "")}">${o.showEm && o.em ? `<span class="oem">${o.em}</span>` : ""}${esc(o.label)}</button>`).join("");
   render(`${c.top || topBar(c.k, c.n)}
     ${coach(c.prompt)}
     <div class="stage">${c.pic ? `<div class="pic ${c.picClass || ""}">${c.pic}</div>` : ""}${c.say ? sayBtn(c.say) : ""}</div>
@@ -392,17 +423,20 @@ function ask(c) {
       const o = c.options[+i];
       if (o.val === c.answer) {
         over = true; b.classList.add("right"); haptic("success"); hideHint();
-        record(c.item, tries === 0);
+        record(c.item, tries === 0, c.kind);
         setCoach(pick(PRAISE) + (c.praise ? " " + c.praise : ""));
         speak(c.say || c.sayAfter || "", true);
-        setTimeout(() => c.next(tries === 0), 1100);
+        if (c.manual) {   // нужно успеть прочитать пояснение — ждём кнопку
+          document.getElementById("nextbox").innerHTML = `<button class="btn" data-act="nx">Дальше ▶</button>`;
+          const ok1 = tries === 0; ACTS.nx = () => c.next(ok1);
+        } else setTimeout(() => c.next(tries === 0), c.delay || 1100);
         return;
       }
       tries++; b.classList.add("tried"); b.disabled = true; haptic("warning");
       if (tries === 1) {
         setCoach("Почти! Давай проверим: " + (o.desc || esc(o.label)) + (c.hint ? ". " + c.hint : ""));
       } else {
-        over = true; record(c.item, false); hideHint();
+        over = true; record(c.item, false, c.kind); hideHint();
         document.querySelectorAll(".opt").forEach((x, j) => { x.disabled = true; if (c.options[j].val === c.answer) x.classList.add("right"); });
         setCoach("Смотри: " + c.reveal + " Запомним! 💪");
         speak(c.say || c.sayAfter || "", true);
@@ -414,25 +448,27 @@ function ask(c) {
   if (c.say && c.autoSay) setTimeout(() => speak(c.say, true), 300);
 }
 
-const enLine = w => `<b>${esc(w.en)}</b> [${esc(w.tr)}] — ${esc(ruShort(w.ru))}${w.em ? " " + w.em : ""}`;
+const enLine = w => w.wb ? `<b>${wbShow(w)}</b> — ${esc(ruShort(w.ru))}${w.em ? " " + w.em : ""}` : `<b>${esc(w.en)}</b> [${esc(w.tr)}] — ${esc(ruShort(w.ru))}${w.em ? " " + w.em : ""}`;
 function letterHint(w) { return `слово начинается на «${esc(w.en[0].toUpperCase())}», в нём ${w.en.replace(/ /g, "").length} ${plural(w.en.replace(/ /g, "").length, "буква", "буквы", "букв")}`; }
 function plural(n, a, b, c) { n = Math.abs(n) % 100; const m = n % 10; return n > 10 && n < 20 ? c : m > 1 && m < 5 ? b : m === 1 ? a : c; }
 
 // «Как по-английски …?» — видна картинка и русское слово, выбираем английское
-function askEn(w, pool, k, n, next, back) {
+function askEn(w, pool, k, n, next, back, xt) {
   const opts = shuffle([w].concat(distract(w, pool, 3, "en"))).map(x => ({ label: x.en, val: x.en, em: x.em, desc: enLine(x) }));
-  ask({ k, n, item: w, back, next, answer: w.en,
+  ask(Object.assign({ k, n, item: w, back, next, answer: w.en, kind: w.wb ? "tr" : undefined,
     prompt: `Как по-английски <b>«${esc(ruShort(w.ru))}»</b>?`,
     pic: w.em || esc(ruShort(w.ru)), picClass: w.em ? "" : "txt ru",
-    options: opts, hint: "Подсказка: " + letterHint(w), reveal: enLine(w) + ".", sayAfter: w.en, praise: `<b>${esc(w.en)}</b> [${esc(w.tr)}]` });
+    options: opts, hint: "Подсказка: " + (w.wb ? wbHint(w) : letterHint(w)), reveal: enLine(w) + ".", sayAfter: w.en,
+    praise: w.wb ? `<b>${wbShow(w)}</b>` : `<b>${esc(w.en)}</b> [${esc(w.tr)}]` }, xt || {}));
 }
 // «Что значит …?» — видно и слышно английское слово, выбираем перевод
-function askRu(w, pool, k, n, next, back) {
+function askRu(w, pool, k, n, next, back, xt) {
   const opts = shuffle([w].concat(distract(w, pool, 3, "ru"))).map(x => ({ label: ruShort(x.ru), val: x.en, em: x.em, showEm: true, desc: enLine(x) }));
-  ask({ k, n, item: w, back, next, answer: w.en, autoSay: true,
+  ask(Object.assign({ k, n, item: w, back, next, answer: w.en, autoSay: true, kind: w.wb ? "tr" : undefined,
     prompt: `Что значит <b>${esc(w.en)}</b>?`,
     pic: esc(w.en), picClass: "txt", say: w.en, options: opts, small: true,
-    hint: `Подсказка: <b>${esc(w.en)}</b> звучит как [${esc(w.tr)}]` + (w.em ? ", а на картинке это " + w.em : ""), reveal: enLine(w) + "." });
+    hint: w.wb ? `Подсказка: нажми 🔊 и послушай ещё раз. ${esc((WB.topicById[w.topic] || {}).hint || "")}${w.em ? ". Картинки в ответах помогут 👀" : ""}`
+      : `Подсказка: <b>${esc(w.en)}</b> звучит как [${esc(w.tr)}]` + (w.em ? ", а на картинке это " + w.em : ""), reveal: enLine(w) + "." }, xt || {}));
 }
 
 /* ---------- собери фразу ---------- */
@@ -442,7 +478,7 @@ function buildPhrase(p, k, n, next, back, top) {
   let bank = shuffle(right.map((t, i) => ({ t, i })));
   if (bank.map(x => x.t).join(" ") === right.join(" ") && right.length > 1) bank.push(bank.shift());
   let line = [], tries = 0;
-  const item = { en: p.en, tr: p.tr, ru: p.ru, em: "" };
+  const item = { en: p.en, tr: p.tr, ru: p.ru, em: "", wb: p.wb };
   function draw() {
     render(`${top || topBar(k, n)}
       ${coach(`Собери фразу: <b>«${esc(p.ru)}»</b>`)}
@@ -458,7 +494,7 @@ function buildPhrase(p, k, n, next, back, top) {
   function check() {
     if (line.map(x => x.t).join(" ") === right.join(" ")) {
       haptic("success"); record(item, tries === 0);
-      setCoach(pick(PRAISE) + ` <b>${esc(p.en)}</b> [${esc(p.tr)}]`); speak(p.en, true);
+      setCoach(pick(PRAISE) + ` <b>${esc(p.en)}</b>${p.tr ? ` [${esc(p.tr)}]` : ""}`); speak(p.en, true);
       setTimeout(() => next(tries === 0), 1400); return;
     }
     tries++; haptic("warning");
@@ -467,7 +503,7 @@ function buildPhrase(p, k, n, next, back, top) {
         setCoach(`Почти! Давай проверим: фраза начинается с <b>«${esc(right[0])}»</b>${right.length > 2 ? ", потом <b>«" + esc(right[1]) + "»</b>" : ""}. Попробуй ещё!`); }, 700);
     } else {
       record(item, false);
-      setCoach(`Смотри: <b>${esc(p.en)}</b> [${esc(p.tr)}] — ${esc(p.ru)} Запомним! 💪`); speak(p.en, true);
+      setCoach(`Смотри: <b>${esc(p.en)}</b>${p.tr ? ` [${esc(p.tr)}]` : ""} — ${esc(p.ru)} Запомним! 💪`); speak(p.en, true);
       document.querySelectorAll(".tok").forEach(x => x.disabled = true);
       document.getElementById("nextbox").innerHTML = `<button class="btn" data-act="nx">Дальше ▶</button>`;
       ACTS.nx = () => next(false);
@@ -820,11 +856,413 @@ const GAMES = {
 };
 
 /* ============================================================
+   📒 ТЕТРАДЬ: слова из рабочей тетради (data.json → workbook).
+   Слово «отлетает», когда tr >= 2 (верных переводов) и sp >= 2
+   (верных написаний). Промашка вычитает 1 из соответствующего счётчика.
+   Прогресс: P.wb = {слово: {tr, sp, miss, last}}, P.wbs = ["тема:глава", "тема"].
+   ============================================================ */
+let WB = null;
+function wbInit() {
+  const W = DATA.workbook; if (!W || !W.topics) return;
+  const byEn = {}, all = [];
+  const topics = W.topics.map(t => {
+    const words = t.words.map(w => { const x = Object.assign({ wb: 1, tr: "", topic: t.id }, w); byEn[x.en] = x; all.push(x); return x; });
+    return Object.assign({}, t, { words });
+  });
+  const pw = w => byEn[w.en] || Object.assign({ wb: "x", tr: "", topic: /e$/.test(w.en) ? "silent_e" : "short" }, w);
+  const pairs = W.pairs.map(p => ({ a: pw(p.a), b: pw(p.b), note: p.note }));
+  const phrases = W.phrases.map(p => ({ ru: p.ru, en: p.en, tr: "", wb: "x" }));
+  WB = { topics, byEn, all, pairs, phrases, topicById: Object.fromEntries(topics.map(t => [t.id, t])) };
+}
+const wbFlown = en => { const s = P.wb[en]; return !!s && s.tr >= 2 && s.sp >= 2; };
+const wbWeak = w => { const s = P.wb[w.en]; return !!s && s.miss > 0 && !wbFlown(w.en); };
+const wbFlownCount = list => list.filter(w => wbFlown(w.en)).length;
+function wbRecord(en, ok, kind) {
+  const w = P.wb[en] || (P.wb[en] = { tr: 0, sp: 0, miss: 0, last: "" });
+  const key = kind === "sp" ? "sp" : "tr";
+  if (ok) w[key]++; else { w.miss++; if (w[key] > 0) w[key]--; }
+  w.last = today().slice(5);
+  if (S.results[en] !== false) S.results[en] = ok;
+  const s = S.wb[en] || (S.wb[en] = [null, null]), i = key === "sp" ? 1 : 0;
+  if (s[i] !== 0) s[i] = ok ? 1 : 0;      // промашка в занятии важнее
+  saveSoon();
+}
+
+/* трудные места слова: [[от, до], ...] */
+function wbMarks(w) {
+  const en = w.en, r = [];
+  const add = s => { const i = en.indexOf(s); if (i >= 0) r.push([i, i + s.length]); };
+  const firstVowel = () => { const m = en.search(/[aeiouy]/); if (m >= 0) r.push([m, m + 1]); };
+  switch (w.topic) {
+    case "sh": add("sh"); break;
+    case "ch": if (en.includes("tch")) add("tch"); else add("ch"); break;
+    case "ar": add("ar"); break;
+    case "or": add("or"); break;
+    case "er": { const m = en.search(/er|ir|ur/); if (m >= 0) r.push([m, m + 2]); break; }
+    case "silent_e":
+      if (en.length > 2 && en.endsWith("e")) {
+        r.push([en.length - 1, en.length]);
+        const m = en.slice(0, -1).search(/[aeiouy][^aeiouy]*$/); if (m >= 0) r.push([m, m + 1]);
+      } else firstVowel();
+      break;
+    default: firstVowel();
+  }
+  if (en.includes("ee")) add("ee");
+  return r;
+}
+function wbShow(w) {          // слово с выделенным трудным местом: sh<ee>p
+  const segs = [];
+  wbMarks(w).sort((a, b) => a[0] - b[0]).forEach(([a, b]) => { const l = segs[segs.length - 1]; if (l && a <= l[1]) l[1] = Math.max(l[1], b); else segs.push([a, b]); });
+  let out = "", p = 0;
+  segs.forEach(([a, b]) => { out += esc(w.en.slice(p, a)) + `<span class="hl">${esc(w.en.slice(a, b))}</span>`; p = b; });
+  return out + esc(w.en.slice(p));
+}
+function wbSplit(w) {         // по буквам: s h e e p, трудное выделено
+  const hl = new Set(); wbMarks(w).forEach(([a, b]) => { for (let i = a; i < b; i++) hl.add(i); });
+  return w.en.split("").map((c, i) => hl.has(i) ? `<span class="hl">${esc(c)}</span>` : esc(c)).join(" ");
+}
+function wbHint(w) {          // подсказка про слово этого задания (перевод не выдаёт)
+  const t = WB.topicById[w.topic], n = w.en.length;
+  return `слово начинается на «${esc(w.en[0].toUpperCase())}», в нём ${n} ${plural(n, "буква", "буквы", "букв")}. ` +
+    (w.note ? "Это исключение: читается не по правилу." : (t ? "Правило: " + esc(t.hint) + "." : ""));
+}
+
+/* ---------- экран «Тетрадь» ---------- */
+function wbHome() {
+  stopTimer();
+  const all = WB.all, n = wbFlownCount(all), weak = all.filter(wbWeak).length, rec = P.records.wb_speed;
+  render(`${topBar(n, all.length, "📒 Отлетают: " + n + " из " + all.length)}
+    <h1>📒 Тетрадь</h1>
+    ${coach("Слова из твоей тетради. Выучим их так, чтобы они <b>отлетали от зубов</b>! Отлетело: <b>" + n + " из " + all.length + "</b> ☕")}
+    <div class="list">${WB.topics.map(t => {
+      const f = wbFlownCount(t.words), pc = Math.round(100 * f / t.words.length);
+      return `<button class="item" data-act="topic" data-arg="${t.id}"><span class="n" style="font-size:32px">${t.emoji}</span>
+        <span class="grow">${esc(t.title)}<div class="bar"><i style="width:${pc}%"></i></div></span>
+        <span class="st">${P.wbs.includes(t.id) ? "✅ " : ""}⭐ ${f}/${t.words.length}</span></button>`;
+    }).join("")}</div>
+    <div class="grid">
+      <button class="card" data-act="weak"><span class="em">🔥</span><span>Слабые слова</span><small>${weak ? weak + " " + plural(weak, "слово", "слова", "слов") : "пока нет"}</small></button>
+      <button class="card" data-act="big"><span class="em">🏆</span><span>Большой диктант</span><small>15 слов</small></button>
+      <button class="card" data-act="twins"><span class="em">👯</span><span>Близнецы</span></button>
+      <button class="card" data-act="phrases"><span class="em">🧩</span><span>Фразы</span></button>
+      <button class="card" data-act="spell"><span class="em">✍️</span><span>Собери слово</span></button>
+      <button class="card" data-act="speed"><span class="em">⚡</span><span>Скоростной раунд</span>${rec ? `<small>🏆 ${rec}</small>` : ""}</button>
+    </div>`, {
+    topic: id => wbTopic(id), weak: wbWeakRun, big: wbBigDictation, twins: wbTwinsRun, phrases: wbPhrasesRun, spell: wbSpellRun, speed: wbSpeed,
+  }, home);
+}
+function wbChapters(t) {      // главы по 8 слов (поровну, чтобы не было крошечной последней)
+  const n = t.words.length, c = Math.ceil(n / 8), base = Math.floor(n / c), extra = n % c, out = [];
+  let p = 0;
+  for (let i = 0; i < c; i++) { const sz = base + (i < extra ? 1 : 0); out.push(t.words.slice(p, p + sz)); p += sz; }
+  return out;
+}
+function wbTopic(tid) {
+  stopTimer();
+  const t = WB.topicById[tid], chs = wbChapters(t), f = wbFlownCount(t.words);
+  render(`${topBar(f, t.words.length, t.emoji + " " + esc(t.title) + " · ⭐ " + f + "/" + t.words.length)}
+    <h1>${t.emoji} ${esc(t.title)}</h1>
+    ${P.wbs.includes(tid) ? `<div class="stamp">✅ Штамп получен</div>` : ""}
+    <div class="list">
+      <button class="item" data-act="rule"><span class="n" style="font-size:30px">📖</span><span class="grow">Правило</span></button>
+      ${chs.map((c, i) => `<button class="item" data-act="ch" data-arg="${i}"><span class="n">${i + 1}</span>
+        <span class="grow">Глава ${i + 1}<div class="muted" style="font-size:20px">${c.length} ${plural(c.length, "слово", "слова", "слов")} · ⭐ ${wbFlownCount(c)}/${c.length}</div></span>
+        <span class="st">${P.wbs.includes(tid + ":" + i) ? "✅" : "▶️"}</span></button>`).join("")}
+    </div>`, {
+    rule: () => wbRuleCard(t, 0, 0, () => wbTopic(tid), () => wbTopic(tid)),
+    ch: i => wbChapter(tid, +i),
+  }, wbHome);
+}
+
+/* ---------- карточки ---------- */
+function wbRuleCard(t, k, n, next, back) {
+  const ex = t.examples.map(en => WB.byEn[en]).filter(Boolean);
+  render(`${n ? topBar(k, n) : topBar(0, 0, "📖 Правило")}
+    <h1>${t.emoji} ${esc(t.title)}</h1>
+    ${coach(esc(t.rule))}
+    <div class="list">${ex.map(w => `<button class="item" data-act="say" data-text="${esc(w.en)}">
+      <span style="font-size:36px">${w.em || "🔊"}</span><span class="grow" style="font-size:36px">${wbShow(w)}</span><span class="st">🔊</span></button>`).join("")}</div>
+    <button class="btn" data-act="nx">Дальше ▶</button>`, { nx: next }, back);
+  setTimeout(() => speak(ex[0] && ex[0].en, true), 400);
+}
+function wbIntro(w, k, n, next, back) {
+  const t = WB.topicById[w.topic];
+  render(`${topBar(k, n)}
+    ${coach("Новое слово! Послушай и скажи вслух 🗣")}
+    <div class="stage">${w.em ? `<div class="pic">${w.em}</div>` : ""}
+      <div class="word">${wbShow(w)}</div>
+      <div class="ru">${esc(w.ru)}</div>
+      ${w.note ? `<div class="bubble">⚠️ Исключение! Читается не по правилу — запомни слово целиком.</div>` : `<div class="muted center">${esc(t.hint)}</div>`}
+      ${sayBtn(w.en)}</div>
+    <button class="btn" data-act="nx">Дальше ▶</button>`, { nx: next }, back);
+  setTimeout(() => speak(w.en, true), 350);
+}
+
+/* ---------- 🧩 Вставь буквы ---------- */
+function wbGap(w) {
+  const en = w.en;
+  const build = (from, to, right, others, max) => ({
+    pre: en.slice(0, from), post: en.slice(to), right,
+    opts: shuffle([right].concat(shuffle(others.filter(o => o !== right)).slice(0, max - 1))),
+  });
+  if (en.includes("ee") && !(["sh", "ch"].includes(w.topic) && Math.random() < 0.5)) { const i = en.indexOf("ee"); return build(i, i + 2, "ee", ["ea", "ie", "i", "e"], 3); }
+  switch (w.topic) {
+    case "sh": { const i = en.indexOf("sh"); if (i >= 0) return build(i, i + 2, "sh", ["ch", "th", "s"], 3); break; }
+    case "ch": {
+      const t = en.indexOf("tch"); if (t >= 0) return build(t, t + 3, "tch", ["ch", "sh", "ck"], 3);
+      const i = en.indexOf("ch"); if (i >= 0) return build(i, i + 2, "ch", ["sh", "th", "c"], 3); break;
+    }
+    case "ar": case "or": { const i = en.indexOf(w.topic); if (i >= 0 && en.length > 2) return build(i, i + 2, w.topic, ["ar", "or", "er", "ir", "ur"], 4); break; }
+    case "er": { const m = en.search(/er|ir|ur/); if (m >= 0) return build(m, m + 2, en.slice(m, m + 2), ["er", "ir", "ur", "or"], 4); break; }
+    case "silent_e": if (en.length > 2 && en.endsWith("e")) return { pre: en.slice(0, -1), post: "", right: "e", opts: shuffle(["e", "-"]) }; break;
+  }
+  const m = Math.max(0, en.search(/[aeiouy]/)), right = en[m];
+  return build(m, m + 1, right, right === "y" ? ["i", "e", "a"] : ["a", "e", "i", "o", "u"], 3);
+}
+function wbGapAsk(w, k, n, next, back, xt) {
+  const g = wbGap(w), ru = esc(ruShort(w.ru));
+  const fill = v => esc(g.pre + (v === "-" ? "" : v) + g.post);
+  ask(Object.assign({ k, n, item: w, kind: "sp", back, next, answer: g.right,
+    prompt: `Вставь буквы! <b>${ru}</b> ${w.em || ""}`,
+    pic: "<span>" + esc(g.pre) + '<span class="gap"></span>' + esc(g.post) + "</span>", picClass: "txt",
+    options: g.opts.map(v => ({ label: v === "-" ? "ничего" : v, val: v, desc: `<b>${fill(v)}</b> — это не наше слово «${ru}»` })),
+    hint: "Подсказка: " + wbHint(w),
+    reveal: `<b>${wbShow(w)}</b> — ${ru}. По буквам: ${wbSplit(w)}.`, sayAfter: w.en, praise: `<b>${wbShow(w)}</b>` }, xt || {}));
+}
+
+/* ---------- ✍️ Собери слово и 🎧 Диктант ---------- */
+function wbTraps(word) {
+  const has = new Set(word.split(""));
+  const vow = shuffle("aeiou".split("").filter(c => !has.has(c)));
+  const con = shuffle("bcdfghklmnprstw".split("").filter(c => !has.has(c)));
+  const tr = [];
+  if (vow.length) tr.push(vow[0]);
+  if (con.length && (word.length >= 4 || !tr.length)) tr.push(con[0]);
+  return tr;
+}
+function wbSpell(w, mode, k, n, next, back, xt) {
+  const word = w.en, ru = esc(ruShort(w.ru)), dict = mode === "dict", voice = dict && !!VOICE;
+  let bank = shuffle(word.split("").concat(wbTraps(word)).map((c, i) => ({ c, i }))), line = [], tries = 0, over = false, lock = false;
+  const tiles = (arr, act, cls) => arr.map((x, j) => `<button class="tile ${cls || ""}" data-act="${act}" data-arg="${j}">${esc(x.c)}</button>`).join("");
+  const refresh = () => {
+    document.getElementById("ans").innerHTML = tiles(line, "out") || '<span class="muted">нажимай на буквы по порядку 👇</span>';
+    document.getElementById("bank").innerHTML = tiles(bank, "in");
+  };
+  const pic = voice ? `<div class="pic">🎧</div>` : (w.em ? `<div class="pic">${w.em}</div>` : `<div class="pic txt ru">${ru}</div>`);
+  const say = voice ? "Послушай 🎧 и собери слово из букв!" :
+    dict ? `В этом телефоне нет голоса 😔 Вместо звука показываю перевод: <b>${ru}</b>. Собери английское слово!` :
+    `Собери слово: <b>${ru}</b> ${w.em || ""}`;
+  render(`${(xt && xt.top) || topBar(k, n)}
+    ${coach(say)}
+    <div class="stage">${pic}${voice ? sayBtn(word) : ""}</div>
+    <div class="answer" id="ans"></div>
+    <div class="tokens" id="bank"></div>
+    <button class="hint" data-act="hint">💡 Подсказка</button>
+    <div id="nextbox"></div>`, {
+    in: j => {
+      if (over || lock) return;
+      line.push(bank.splice(+j, 1)[0]); refresh();
+      if (line.length === word.length) check();
+    },
+    out: j => { if (over || lock) return; bank.push(line.splice(+j, 1)[0]); refresh(); },
+    hint: () => { if (!over) setCoach("💡 " + wbHint(w)); },
+  }, back || wbHome);
+  refresh();
+  if (voice) setTimeout(() => speak(word, true), 350);
+  function check() {
+    if (line.map(x => x.c).join("") === word) {
+      over = true; haptic("success"); hideHint(); record(w, tries === 0, "sp");
+      document.getElementById("ans").innerHTML = tiles(line, "x", "ok");
+      setCoach(pick(PRAISE) + ` <b>${wbShow(w)}</b> — ${ru}`); speak(word, true);
+      setTimeout(() => next(tries === 0), 1500); return;
+    }
+    tries++; haptic("warning");
+    if (tries === 1) {
+      lock = true;
+      setTimeout(() => { if (over) return; bank = shuffle(bank.concat(line)); line = []; lock = false; refresh();
+        setCoach("Почти! Давай проверим: " + wbHint(w) + " Попробуй ещё!"); }, 700);
+    } else {
+      over = true; record(w, false, "sp"); hideHint();
+      document.getElementById("ans").innerHTML = tiles(word.split("").map(c => ({ c })), "x", "ok");
+      document.getElementById("bank").innerHTML = "";
+      setCoach(`Смотри: <b>${wbShow(w)}</b> — ${ru}. По буквам: ${wbSplit(w)}. Запомним! 💪`); speak(word, true);
+      document.getElementById("nextbox").innerHTML = `<button class="btn" data-act="nx">Дальше ▶</button>`;
+      ACTS.nx = () => next(false);
+    }
+  }
+}
+
+/* ---------- 👯 Близнецы ---------- */
+function wbTwin(p, k, n, next, back, xt) {
+  const asked = Math.random() < 0.5 ? p.a : p.b, ru = esc(ruShort(asked.ru));
+  ask(Object.assign({ k, n, back, next, item: asked.wb === 1 ? asked : { en: asked.en, wb: "x" }, kind: "tr",
+    answer: asked.en, manual: true, sayAfter: asked.en,
+    prompt: `Какое слово значит <b>«${ru}»</b>? Они похожи — смотри внимательно! 👯`,
+    pic: asked.em || ru, picClass: asked.em ? "" : "txt ru",
+    options: shuffle([p.a, p.b]).map(x => ({ label: x.en, val: x.en, desc: `<b>${esc(x.en)}</b> — это «${esc(ruShort(x.ru))}»` })),
+    hint: `Подсказка: в нужном слове ${asked.en.length} ${plural(asked.en.length, "буква", "буквы", "букв")}`,
+    reveal: `<b>${wbShow(asked)}</b> — ${ru}. ${esc(p.note)}`, praise: `<b>${wbShow(asked)}</b> — ${ru}.<br>${esc(p.note)}` }, xt || {}));
+}
+
+/* ---------- шаги и запуск ---------- */
+function wbMix(list) {
+  const a = shuffle(list), key = s => s[1] && s[1].en;
+  for (let i = 1; i < a.length; i++) {
+    if (key(a[i]) && key(a[i]) === key(a[i - 1])) {
+      const j = a.findIndex((x, j) => j > i && key(x) !== key(a[i - 1]) && key(x) !== key(a[i]));
+      if (j > 0) [a[i], a[j]] = [a[j], a[i]];
+    }
+  }
+  return a;
+}
+function wbStep(st, k, n, go, back, ctx) {
+  const w = st[1];
+  switch (st[0]) {
+    case "rule": return wbRuleCard(ctx.topic, k, n, go, back);
+    case "intro": return wbIntro(w, k, n, go, back);
+    case "en": return askEn(w, ctx.pool, k, n, go, back);
+    case "ru": return askRu(w, ctx.pool, k, n, go, back);
+    case "spell": return st[2] === "gap" ? wbGapAsk(w, k, n, go, back) : wbSpell(w, st[2], k, n, go, back);
+    case "twin": return wbTwin(w, k, n, go, back);
+    case "phrase": return buildPhrase(w, k, n, go, back);
+  }
+}
+function wbRun(steps, ctx, onDone, back) {
+  let i = 0, good = 0;
+  const scored = steps.filter(s => !["rule", "intro"].includes(s[0])).length;
+  const go = ok => {
+    if (ok === true) good++;
+    if (i >= steps.length) return onDone(good, scored);
+    const st = steps[i++]; wbStep(st, i, steps.length, go, back, ctx);
+  };
+  go();
+}
+function wbChapter(tid, idx) {
+  stopTimer();
+  const t = WB.topicById[tid], words = wbChapters(t)[idx], steps = [];
+  if (idx === 0) steps.push(["rule"]);
+  for (let i = 0; i < words.length; i += 2) {
+    const pair = words.slice(i, i + 2);
+    pair.forEach(w => steps.push(["intro", w]));
+    pair.forEach(w => steps.push(["en", w]));
+  }
+  const modes = shuffle(["build", "dict", "gap"]), train = [], seen = new Set();
+  shuffle(words).forEach((w, i) => { train.push(["ru", w]); train.push(["spell", w, modes[i % 3]]); });
+  words.forEach(w => { const p = WB.pairs.find(p => p.a.en === w.en || p.b.en === w.en); if (p && !seen.has(p)) { seen.add(p); train.push(["twin", p]); } });
+  wbRun(steps.concat(wbMix(train)), { pool: t.words, topic: t }, () => wbChapterDone(t, idx), () => wbTopic(tid));
+}
+function wbChapterDone(t, idx) {
+  const chs = wbChapters(t), words = chs[idx], key = t.id + ":" + idx;
+  if (!P.wbs.includes(key)) P.wbs.push(key);
+  let stamp = false;
+  if (chs.every((_, i) => P.wbs.includes(t.id + ":" + i)) && !P.wbs.includes(t.id)) { P.wbs.push(t.id); stamp = true; }
+  addStars(1);
+  const hasNext = idx + 1 < chs.length, f = wbFlownCount(words);
+  render(`<div class="big">${stamp ? "✅" : "🎉☕"}</div>
+    <h1 class="center">${stamp ? "Тема «" + esc(t.title) + "» пройдена!" : "Глава " + (idx + 1) + " пройдена!"}</h1>
+    ${stamp ? `<div class="stamp">✅ ${t.emoji} ${esc(t.title)}</div>` : ""}
+    ${coach(stamp ? "Ура! Все главы темы пройдены — держи штамп! 🎖" : "Well done! Ещё одна чашка чая в копилке ☕")}
+    <p class="muted center">Отлетают: ${f} из ${words.length}. ⭐ — слово уже отлетает, остальные повторим, и они тоже полетят!</p>
+    <div class="chips big">${words.map(w => `<button class="chip ${wbFlown(w.en) ? "got" : ""}" data-act="say" data-text="${esc(w.en)}">${esc(w.en)}${wbFlown(w.en) ? " ⭐" : ""}</button>`).join("")}</div>
+    ${f < words.length ? `<button class="btn navy" data-act="fix">✍️ Закрепить написание слов</button>` : ""}
+    ${hasNext ? `<button class="btn" data-act="next">➡ Глава ${idx + 2}</button>` : ""}
+    <button class="btn navy" data-act="topic">📒 К теме</button>
+    <button class="btn ghost" data-act="home">🏠 На главную</button>`, {
+    next: () => wbChapter(t.id, idx + 1), topic: () => wbTopic(t.id), home,
+    fix: () => wbFix(t, idx),
+  }, () => wbTopic(t.id));
+}
+function wbFix(t, idx) {      // «Закрепить»: ещё по одному заданию на написание для слов главы
+  const words = wbChapters(t)[idx], modes = shuffle(["build", "dict", "gap"]);
+  wbRun(wbMix(words.map((w, i) => ["spell", w, modes[i % 3]])), { pool: t.words, topic: t }, (ok, n) => {
+    addStars(1);
+    wbEnd("✍️ Слова закреплены", `С первого раза: ${ok} из ${n}. Теперь отлетают ${wbFlownCount(words)} из ${words.length} слов.`, () => wbFix(t, idx));
+  }, () => wbTopic(t.id));
+}
+function wbEnd(title, line, again, rec) {
+  stopTimer(); showFinish();
+  render(`<div class="big">🏁</div><h1 class="center">${esc(title)}</h1>
+    ${coach(`${line} ${pick(["Супер! ☕", "Well done! 👏", "Ты молодец! 🎉"])}`)}${rec || ""}
+    ${again ? `<button class="btn" data-act="again">🔄 Ещё раз</button>` : ""}
+    <button class="btn navy" data-act="wb">📒 В тетрадь</button>
+    <button class="btn ghost" data-act="home">🏠 На главную</button>`, { again, wb: wbHome, home }, wbHome);
+}
+function wbPick(n) {      // слова, которые нужнее всего: слабые, потом те, что ещё не отлетают
+  return WB.all.map(w => [w, (wbFlown(w.en) ? 2 : 0) - (wbWeak(w) ? 1.5 : 0) + Math.random() * 1.2])
+    .sort((a, b) => a[1] - b[1]).slice(0, n).map(x => x[0]);
+}
+
+/* ---------- режимы ---------- */
+function wbWeakRun() {
+  const list = WB.all.filter(wbWeak).sort((a, b) => P.wb[b.en].miss - P.wb[a.en].miss).slice(0, 10);
+  if (!list.length) { toast("Слабых слов пока нет — ура! 🎉 Поиграй в «Большой диктант»."); return; }
+  const modes = ["build", "dict", "gap"], steps = [];
+  list.forEach((w, i) => { steps.push(["ru", w]); steps.push(["spell", w, modes[i % 3]]); });
+  wbRun(wbMix(steps), { pool: WB.all }, (ok, n) => {
+    addStars(1);
+    wbEnd("🔥 Слабые слова", `С первого раза: ${ok} из ${n}. Теперь отлетают ${wbFlownCount(list)} из ${list.length} слов.`, wbWeakRun);
+  }, wbHome);
+}
+function wbBigDictation() {
+  const list = wbPick(15), steps = [];
+  list.forEach(w => { steps.push(["ru", w]); steps.push(["spell", w, "dict"]); });
+  wbRun(steps, { pool: WB.all }, (ok, n) => {
+    addStars(1);
+    wbEnd("🏆 Большой диктант", `С первого раза: ${ok} из ${n}.`, wbBigDictation);
+  }, wbHome);
+}
+function wbSpellRun() {
+  const list = wbPick(8), modes = ["build", "dict", "gap"];
+  wbRun(list.map((w, i) => ["spell", w, modes[i % 3]]), { pool: WB.all }, (ok, n) => {
+    addStars(1); wbEnd("✍️ Собери слово", `С первого раза: ${ok} из ${n}.`, wbSpellRun);
+  }, wbHome);
+}
+function wbTwinsRun() {
+  const steps = shuffle(WB.pairs).map(p => ["twin", p]);
+  wbRun(steps, { pool: WB.all }, (ok, n) => {
+    addStars(1); wbEnd("👯 Близнецы", `С первого раза: ${ok} из ${n}.`, wbTwinsRun);
+  }, wbHome);
+}
+function wbPhrasesRun() {
+  const ph = shuffle(WB.phrases.filter(p => { const n = tokensOf(p.en).length; return n >= 2 && n <= 7; })).slice(0, 6);
+  wbRun(ph.map(p => ["phrase", p]), { pool: WB.all }, (ok, n) => {
+    addStars(1); wbEnd("🧩 Фразы", `Собрано с первого раза: ${ok} из ${n}.`, wbPhrasesRun);
+  }, wbHome);
+}
+function wbSpeed() {
+  stopTimer();
+  const pool = WB.all, order = shuffle(pool), D = 60, end = Date.now() + D * 1000;
+  let score = 0, i = 0, done = false;
+  const left = () => Math.max(0, Math.round((end - Date.now()) / 1000));
+  const line = () => `⚡ ${left()} с · счёт ${score}`;
+  const finish = () => {
+    if (done) return; done = true; stopTimer();
+    const best = P.records.wb_speed || 0; let rec = "";
+    if (score > best) { P.records.wb_speed = score; rec = `<p class="center" style="font-size:24px">🏆 Новый рекорд!</p>`; }
+    else if (best) rec = `<p class="center muted">Рекорд: ${best}</p>`;
+    addStars(1);
+    wbEnd("⚡ Скоростной раунд", `Время вышло! Счёт: ${score}.`, wbSpeed, rec);
+  };
+  startTimer(() => {
+    if (Date.now() >= end) return finish();
+    const p = document.querySelector(".prog");
+    if (p && p.firstChild) { p.firstChild.nodeValue = line(); const b = p.querySelector(".bar i"); if (b) b.style.width = Math.round(100 * (D - left()) / D) + "%"; }
+  });
+  (function go(ok) {
+    if (done) return;
+    if (ok === true) score++;
+    if (Date.now() >= end) return finish();
+    const w = order[i++ % order.length];
+    (i % 2 ? askEn : askRu)(w, pool, 0, 0, go, () => { done = true; stopTimer(); wbHome(); }, { top: topBar(D - left(), D, line()), delay: 450 });
+  })();
+}
+
+/* ============================================================
    ЗАКОНЧИТЬ: итог занятия уходит боту (sendData).
    Работает, только если приложение открыто кнопкой клавиатуры
    «📱 Miss Lily» внизу чата. Иначе итог ждёт следующего раза.
    ============================================================ */
-function hasResults() { return Object.keys(S.results).length || S.games.length || S.lessons.length || (P && P.pending); }
+function hasResults() { return Object.keys(S.results).length || Object.keys(S.wb).length || S.games.length || S.lessons.length || (P && P.pending); }
 function showFinish() { $finish.hidden = !(P && hasResults()); }
 function canSend() {
   if (!IN_TG || !TG.sendData) return false;
@@ -833,12 +1271,18 @@ function canSend() {
 function payload() {
   const pend = P.pending || { r: {}, g: [], l: [], m: 0 };
   const r = Object.assign({}, pend.r); Object.entries(S.results).forEach(([w, ok]) => { if (r[w] !== false) r[w] = ok; });
+  const wm = {};   // слова тетради: [перевод, написание], null — не проверялось; промашка важнее
+  [pend.w || {}, S.wb].forEach(src => Object.entries(src).forEach(([en, v]) => {
+    const c = wm[en] || (wm[en] = [null, null]);
+    v.forEach((f, i) => { if (f !== null && f !== undefined && c[i] !== 0) c[i] = f; });
+  }));
   return {
     v: 1, lesson: P.lesson, done: P.done.slice(0, 20),
     l: [...new Set(pend.l.concat(S.lessons))].slice(0, 20),
     g: pend.g.concat(S.games).slice(-20),
     r: Object.entries(r).slice(-60).map(([w, ok]) => [w, ok ? 1 : 0]),
     m: pend.m + Math.round((Date.now() - S.started) / 60000),
+    w: Object.entries(wm).slice(-80).map(([en, v]) => [en, v[0], v[1]]),
   };
 }
 function finishSession() {
@@ -846,12 +1290,12 @@ function finishSession() {
   const d = payload();
   if (canSend()) {
     let json = JSON.stringify(d);
-    while (json.length > 4000 && d.r.length) { d.r.shift(); json = JSON.stringify(d); }
+    while (json.length > 4000 && (d.r.length || d.w.length)) { (d.r.length ? d.r : d.w).shift(); json = JSON.stringify(d); }
     P.pending = null; save();
     try { TG.sendData(json); return; } catch (e) { /* ниже — запасной путь */ }
   }
-  P.pending = { r: Object.fromEntries(d.r.map(([w, ok]) => [w, !!ok])), g: d.g, l: d.l, m: d.m };
-  S.results = {}; S.games = []; S.lessons = []; S.started = Date.now();
+  P.pending = { r: Object.fromEntries(d.r.map(([w, ok]) => [w, !!ok])), g: d.g, l: d.l, m: d.m, w: Object.fromEntries(d.w.map(([en, t, s]) => [en, [t, s]])) };
+  S.results = {}; S.wb = {}; S.games = []; S.lessons = []; S.started = Date.now();
   save();
   render(`<div class="big">☕</div><h1 class="center">Всё сохранено!</h1>
     ${coach("Прогресс запомнила. Чтобы я рассказала маме, как прошло занятие, открой приложение кнопкой <b>«📱 Miss Lily»</b> внизу чата и нажми «✅ Закончить».")}
@@ -868,6 +1312,7 @@ function finishSession() {
     return;
   }
   DATA.lessons.forEach(l => l.words.concat(l.extra).forEach(w => { ALL[w.en] = Object.assign({ lesson: l.id }, w); }));
+  wbInit();
   P = await loadP();
   save();
   const go = URLP.get("go");
