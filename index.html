@@ -537,10 +537,12 @@ function startLesson(id, part) {
   }
   shuffle(items).forEach(w => steps.push(["ru", w]));
   if (part === "words") L.phrases.forEach(p => { steps.push(["phrase", p]); const n = tokensOf(p.en).length; if (n >= 2 && n <= 7) steps.push(["build", p]); });
-  let i = 0;
+  let i = 0, good = 0;
+  const scored = steps.filter(s => s[0] === "en" || s[0] === "ru" || s[0] === "build").length, sid = DIARY.newSid();
   const back = () => home();
-  function go() {
-    if (i >= steps.length) return lessonDone(L, part);
+  function go(ok) {
+    if (ok === true) good++;
+    if (i >= steps.length) return lessonDone(L, part, good, scored, sid);
     const [t, w] = steps[i++], k = i, n = steps.length;
     if (t === "intro") introCard(w, k, n, go, back);
     else if (t === "phrase") introCard(w, k, n, go, back, true);
@@ -550,7 +552,8 @@ function startLesson(id, part) {
   }
   go();
 }
-function lessonDone(L, part) {
+function lessonDone(L, part, good, scored, sid) {
+  DIARY.record("lesson_done", good, scored, "lesson_" + L.id + (part === "extra" ? "_extra" : ""), sid);
   if (!P.done.includes(L.id)) P.done.push(L.id);
   if (part === "extra") P.extra[L.id] = true;
   const next = DATA.lessons.find(l => l.id > L.id && !P.done.includes(l.id));
@@ -576,9 +579,10 @@ function startReview() {
   const score = w => { const s = P.words[w.en] || { ok: 0, miss: 0, last: "" }; return (s.miss - s.ok) * 10 + (s.last ? 0 : 5) + Math.random() * 3 - (s.last === today() ? 4 : 0); };
   const list = pool.slice().sort((a, b) => score(b) - score(a)).slice(0, 8);
   let i = 0, ok = 0;
+  const sid = DIARY.newSid();
   (function go(prevOk) {
     if (prevOk) ok++;
-    if (i >= list.length) { addStars(1); return endScreen("🔤 Повторение", `${ok} из ${list.length} с первого раза`, null, startReview); }
+    if (i >= list.length) { addStars(1); DIARY.record("lesson_done", ok, list.length, "review", sid); return endScreen("🔤 Повторение", `${ok} из ${list.length} с первого раза`, null, startReview); }
     const w = list[i++];
     (i % 2 ? askEn : askRu)(w, pool, i, list.length, go, home);
   })();
@@ -597,10 +601,11 @@ function gamesMenu() {
       <button class="card wide navy" data-act="chat"><span class="em">💬</span><span>Голосовые игры и истории — в чате</span></button></div>`,
     { play: k => GAMES[k](), chat: chatScreen }, home);
 }
-function endScreen(title, line, gameKey, again, score) {
+function endScreen(title, line, gameKey, again, score, total) {
   stopTimer();
   let rec = "";
   if (gameKey) {
+    DIARY.record("game", Math.min(score || 0, total || 0), total || 0, gameKey);
     S.games.push([gameKey, score || 0]);
     const best = P.records[gameKey] || 0;
     if ((score || 0) > best) { P.records[gameKey] = score; rec = `<p class="center" style="font-size:24px">🏆 Новый рекорд!</p>`; }
@@ -632,7 +637,7 @@ const GAMES = {
     const R = 6; let r = 0, score = 0;
     (function go(ok) {
       if (ok) score++;
-      if (r >= R) return endScreen("Что лишнее?", `Угадано: ${score} из ${R}.`, "odd_one_out", GAMES.odd_one_out, score);
+      if (r >= R) return endScreen("Что лишнее?", `Угадано: ${score} из ${R}.`, "odd_one_out", GAMES.odd_one_out, score, R);
       r++;
       // слово может быть в двух группах (bear — и зверь, и игрушка): такие не берём
       let a, b, three, odd;
@@ -659,7 +664,7 @@ const GAMES = {
     if (withGroup.length < 4) { toast("Пока мало слов. Пройди ещё урок 🚌"); return gamesMenu(); }
     const R = 4; let r = 0, score = 0;
     (function round() {
-      if (r >= R) return endScreen("Горячо–холодно", `Отгадано: ${score} из ${R}.`, "hot_cold", GAMES.hot_cold, score);
+      if (r >= R) return endScreen("Горячо–холодно", `Отгадано: ${score} из ${R}.`, "hot_cold", GAMES.hot_cold, score, R);
       r++;
       const sec = pick(withGroup), g = groupOf(sec.en);
       const same = shuffle(withGroup.filter(w => w.en !== sec.en && groupOf(w.en) === g)).slice(0, 2);
@@ -712,7 +717,7 @@ const GAMES = {
     const list = ph.slice(0, 5); let r = 0, score = 0;
     (function go(ok) {
       if (ok) score++;
-      if (r >= list.length) return endScreen("Собери фразу", `Собрано с первого раза: ${score} из ${list.length}.`, "build_phrase", GAMES.build_phrase, score);
+      if (r >= list.length) return endScreen("Собери фразу", `Собрано с первого раза: ${score} из ${list.length}.`, "build_phrase", GAMES.build_phrase, score, list.length);
       r++; buildPhrase(list[r - 1], r, list.length, go, gamesMenu);
     })();
   },
@@ -724,10 +729,10 @@ const GAMES = {
     const list = shuffle(pool).slice(0, R); while (list.length < R) list.push(pick(pool));
     let r = 0, score = 0;
     const stop = stopTimer;
-    startTimer(() => { const p = document.querySelector(".prog"); if (Date.now() > end) { stop(); endScreen("Переводчик", `Время вышло! Счёт: ${score}.`, "fast_translate", GAMES.fast_translate, score); } else if (p && p.firstChild) p.firstChild.nodeValue = `${r} / ${R} · ${timerLine(end)}`; });
+    startTimer(() => { const p = document.querySelector(".prog"); if (Date.now() > end) { stop(); endScreen("Переводчик", `Время вышло! Счёт: ${score}.`, "fast_translate", GAMES.fast_translate, score, Math.max(score, r)); } else if (p && p.firstChild) p.firstChild.nodeValue = `${r} / ${R} · ${timerLine(end)}`; });
     (function go(ok) {
       if (ok) score++;
-      if (r >= R) { stop(); return endScreen("Переводчик", `Счёт: ${score} из ${R}.`, "fast_translate", GAMES.fast_translate, score); }
+      if (r >= R) { stop(); return endScreen("Переводчик", `Счёт: ${score} из ${R}.`, "fast_translate", GAMES.fast_translate, score, R); }
       r++;
       askEn(list[r - 1], pool, r, R, go, () => { stop(); gamesMenu(); });
     })();
@@ -751,7 +756,7 @@ const GAMES = {
     let r = 0, score = 0;
     (function go(ok) {
       if (ok) score++;
-      if (r >= R) return endScreen("Да или нет", `Верных ответов: ${score} из ${R}.`, "yes_no", GAMES.yes_no, score);
+      if (r >= R) return endScreen("Да или нет", `Верных ответов: ${score} из ${R}.`, "yes_no", GAMES.yes_no, score, R);
       const x = list[r++];
       ask({ k: r, n: R, item: null, answer: x.a ? "yes" : "no", next: go, back: gamesMenu, autoSay: true, say: x.q,
         prompt: "Yes или no? 🤔", pic: (x.em ? x.em + "<br>" : "") + `<span style="font-size:36px">${esc(x.q)}</span>`, picClass: x.em ? "" : "txt",
@@ -766,7 +771,7 @@ const GAMES = {
     const R = 3; let r = 0, score = 0;
     round();
     function round() {
-      if (r >= R) return endScreen("Запомни три", `Вспомнила все три: ${score} ${plural(score, "раз", "раза", "раз")} из ${R}.`, "remember_three", GAMES.remember_three, score);
+      if (r >= R) return endScreen("Запомни три", `Вспомнила все три: ${score} ${plural(score, "раз", "раза", "раз")} из ${R}.`, "remember_three", GAMES.remember_three, score, R);
       r++;
       const three = shuffle(pool).slice(0, 3), others = distract(three[0], pool.filter(w => !three.includes(w)), 5);
       render(`${topBar(r, R)}
@@ -815,7 +820,7 @@ const GAMES = {
     const R = 6, list = shuffle(pool).slice(0, R); let r = 0, score = 0;
     (function go(ok) {
       if (ok) score++;
-      if (r >= Math.min(R, list.length)) return endScreen("Что я сказала?", `Расслышано: ${score} из ${Math.min(R, list.length)}.`, "what_did_i_say", GAMES.what_did_i_say, score);
+      if (r >= Math.min(R, list.length)) return endScreen("Что я сказала?", `Расслышано: ${score} из ${Math.min(R, list.length)}.`, "what_did_i_say", GAMES.what_did_i_say, score, Math.min(R, list.length));
       const w = list[r++];
       const opts = shuffle([w].concat(distract(w, pool, 3, "ru"))).map(x => ({ label: ruShort(x.ru), val: x.en, em: x.em, showEm: true, desc: enLine(x) }));
       ask({ k: r, n: Math.min(R, list.length), item: w, answer: w.en, next: go, back: gamesMenu, autoSay: true, small: true,
@@ -834,7 +839,7 @@ const GAMES = {
     const end = Date.now() + (gameInfo("find_at_home").minutes || 10) * 60000;
     let deck = shuffle(picked), found = 0, n = 0;
     const stop = stopTimer;
-    const finish = () => { stop(); endScreen("Найди дома", `Найдено вещей: ${found}.`, "find_at_home", GAMES.find_at_home, found); };
+    const finish = () => { stop(); endScreen("Найди дома", `Найдено вещей: ${found}.`, "find_at_home", GAMES.find_at_home, found, found); };
     startTimer(() => { const p = document.querySelector(".prog"); if (Date.now() > end) finish(); else if (p && p.firstChild) p.firstChild.nodeValue = `Найдено: ${found} · ${timerLine(end)}`; });
     (function task() {
       if (!deck.length) deck = shuffle(picked);
@@ -1149,9 +1154,10 @@ function wbChapter(tid, idx) {
   const modes = shuffle(["build", "dict", "gap"]), train = [], seen = new Set();
   shuffle(words).forEach((w, i) => { train.push(["ru", w]); train.push(["spell", w, modes[i % 3]]); });
   words.forEach(w => { const p = WB.pairs.find(p => p.a.en === w.en || p.b.en === w.en); if (p && !seen.has(p)) { seen.add(p); train.push(["twin", p]); } });
-  wbRun(steps.concat(wbMix(train)), { pool: t.words, topic: t }, () => wbChapterDone(t, idx), () => wbTopic(tid));
+  wbRun(steps.concat(wbMix(train)), { pool: t.words, topic: t }, (ok, n) => wbChapterDone(t, idx, ok, n), () => wbTopic(tid));
 }
-function wbChapterDone(t, idx) {
+function wbChapterDone(t, idx, good, scored) {
+  DIARY.record("lesson_done", good, scored, "wb_chapter");
   const chs = wbChapters(t), words = chs[idx], key = t.id + ":" + idx;
   if (!P.wbs.includes(key)) P.wbs.push(key);
   let stamp = false;
@@ -1176,10 +1182,11 @@ function wbFix(t, idx) {      // «Закрепить»: ещё по одном�
   const words = wbChapters(t)[idx], modes = shuffle(["build", "dict", "gap"]);
   wbRun(wbMix(words.map((w, i) => ["spell", w, modes[i % 3]])), { pool: t.words, topic: t }, (ok, n) => {
     addStars(1);
-    wbEnd("✍️ Слова закреплены", `С первого раза: ${ok} из ${n}. Теперь отлетают ${wbFlownCount(words)} из ${words.length} слов.`, () => wbFix(t, idx));
+    wbEnd("✍️ Слова закреплены", `С первого раза: ${ok} из ${n}. Теперь отлетают ${wbFlownCount(words)} из ${words.length} слов.`, () => wbFix(t, idx), "", ["lesson_done", ok, n, "wb_fix"]);
   }, () => wbTopic(t.id));
 }
-function wbEnd(title, line, again, rec) {
+function wbEnd(title, line, again, rec, res) {      // res: [тип, верно, всего, topic] — итог в дневник
+  if (res) DIARY.record(res[0], res[1], res[2], res[3]);
   stopTimer(); showFinish();
   render(`<div class="big">🏁</div><h1 class="center">${esc(title)}</h1>
     ${coach(`${line} ${pick(["Супер! ☕", "Well done! 👏", "Ты молодец! 🎉"])}`)}${rec || ""}
@@ -1200,7 +1207,7 @@ function wbWeakRun() {
   list.forEach((w, i) => { steps.push(["ru", w]); steps.push(["spell", w, modes[i % 3]]); });
   wbRun(wbMix(steps), { pool: WB.all }, (ok, n) => {
     addStars(1);
-    wbEnd("🔥 Слабые слова", `С первого раза: ${ok} из ${n}. Теперь отлетают ${wbFlownCount(list)} из ${list.length} слов.`, wbWeakRun);
+    wbEnd("🔥 Слабые слова", `С первого раза: ${ok} из ${n}. Теперь отлетают ${wbFlownCount(list)} из ${list.length} слов.`, wbWeakRun, "", ["lesson_done", ok, n, "wb_weak"]);
   }, wbHome);
 }
 function wbBigDictation() {
@@ -1208,25 +1215,25 @@ function wbBigDictation() {
   list.forEach(w => { steps.push(["ru", w]); steps.push(["spell", w, "dict"]); });
   wbRun(steps, { pool: WB.all }, (ok, n) => {
     addStars(1);
-    wbEnd("🏆 Большой диктант", `С первого раза: ${ok} из ${n}.`, wbBigDictation);
+    wbEnd("🏆 Большой диктант", `С первого раза: ${ok} из ${n}.`, wbBigDictation, "", ["lesson_done", ok, n, "wb_dictation"]);
   }, wbHome);
 }
 function wbSpellRun() {
   const list = wbPick(8), modes = ["build", "dict", "gap"];
   wbRun(list.map((w, i) => ["spell", w, modes[i % 3]]), { pool: WB.all }, (ok, n) => {
-    addStars(1); wbEnd("✍️ Собери слово", `С первого раза: ${ok} из ${n}.`, wbSpellRun);
+    addStars(1); wbEnd("✍️ Собери слово", `С первого раза: ${ok} из ${n}.`, wbSpellRun, "", ["lesson_done", ok, n, "wb_spell"]);
   }, wbHome);
 }
 function wbTwinsRun() {
   const steps = shuffle(WB.pairs).map(p => ["twin", p]);
   wbRun(steps, { pool: WB.all }, (ok, n) => {
-    addStars(1); wbEnd("👯 Близнецы", `С первого раза: ${ok} из ${n}.`, wbTwinsRun);
+    addStars(1); wbEnd("👯 Близнецы", `С первого раза: ${ok} из ${n}.`, wbTwinsRun, "", ["lesson_done", ok, n, "wb_twins"]);
   }, wbHome);
 }
 function wbPhrasesRun() {
   const ph = shuffle(WB.phrases.filter(p => { const n = tokensOf(p.en).length; return n >= 2 && n <= 7; })).slice(0, 6);
   wbRun(ph.map(p => ["phrase", p]), { pool: WB.all }, (ok, n) => {
-    addStars(1); wbEnd("🧩 Фразы", `Собрано с первого раза: ${ok} из ${n}.`, wbPhrasesRun);
+    addStars(1); wbEnd("🧩 Фразы", `Собрано с первого раза: ${ok} из ${n}.`, wbPhrasesRun, "", ["lesson_done", ok, n, "wb_phrases"]);
   }, wbHome);
 }
 function wbSpeed() {
@@ -1241,7 +1248,7 @@ function wbSpeed() {
     if (score > best) { P.records.wb_speed = score; rec = `<p class="center" style="font-size:24px">🏆 Новый рекорд!</p>`; }
     else if (best) rec = `<p class="center muted">Рекорд: ${best}</p>`;
     addStars(1);
-    wbEnd("⚡ Скоростной раунд", `Время вышло! Счёт: ${score}.`, wbSpeed, rec);
+    wbEnd("⚡ Скоростной раунд", `Время вышло! Счёт: ${score}.`, wbSpeed, rec, ["game", score, Math.max(score, i), "wb_speed"]);
   };
   startTimer(() => {
     if (Date.now() >= end) return finish();
@@ -1256,6 +1263,78 @@ function wbSpeed() {
     (i % 2 ? askEn : askRu)(w, pool, 0, 0, go, () => { done = true; stopTimer(); wbHome(); }, { top: topBar(D - left(), D, line()), delay: 450 });
   })();
 }
+
+  /* =====================================================================
+     ДНЕВНИК «Катиной школы»: каждое завершённое занятие/игра уходит туда ровно один раз.
+     initData подписан токеном этого бота, дневник это проверяет. Сначала событие кладётся в
+     очередь localStorage, потом отправляется (3 попытки); не дошло — досылается при следующем
+     открытии. Повторы не страшны: дневник узнаёт занятие по session_id. Ребёнку ничего не
+     показываем, ошибки тихие. Вне Telegram (нет initData) не делает ничего.
+     ===================================================================== */
+  var DIARY = (function () {
+    var API = "https://35-225-33-86.sslip.io/api/event", QKEY = "ks_diary_q", SUBJ = "eng";
+    var MAX_AGE = 14 * 24 * 3600 * 1000, seen = {}, last = { k: "", t: 0 };
+    function initData() { try { return window.Telegram.WebApp.initData || ""; } catch (e) { return ""; } }
+    function qGet() { try { var q = JSON.parse(localStorage.getItem(QKEY) || "[]"); return Array.isArray(q) ? q : []; } catch (e) { return []; } }
+    function qSet(q) { try { localStorage.setItem(QKEY, JSON.stringify(q.slice(-50))); } catch (e) {} }
+    function qDel(sid) { qSet(qGet().filter(function (x) { return x.session_id !== sid; })); }
+    function newSid() {
+      try { if (window.crypto && crypto.randomUUID) return "ks-" + crypto.randomUUID().replace(/-/g, "").slice(0, 24); } catch (e) {}
+      return "ks-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
+    }
+    function post(ev, idata) {      // -> "ok" | "drop" | "keep"
+      var body = { initData: idata, session_id: ev.session_id, subject: ev.subject, kind: ev.kind, correct: ev.correct, total: ev.total };
+      if (ev.topic) body.topic = ev.topic;
+      try {
+        return fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), keepalive: true })
+          .then(function (r) { return r.ok ? "ok" : (r.status === 400 || r.status === 403) ? "drop" : "keep"; })
+          .catch(function () { return "keep"; });
+      } catch (e) { return Promise.resolve("keep"); }
+    }
+    function deliver(ev, tries) {
+      var id = initData(); if (!id) return;
+      post(ev, id).then(function (res) {
+        if (res === "ok" || res === "drop") { qDel(ev.session_id); return; }
+        if (tries > 1) setTimeout(function () { deliver(ev, tries - 1); }, tries === 3 ? 1500 : 4000);
+      });
+    }
+    return {
+      newSid: newSid,
+      // kind: "lesson_done" | "game"; sid — необязательный (один и тот же sid = то же занятие)
+      record: function (kind, correct, total, topic, sid) {
+        try {
+          total = Math.max(0, Math.min(100, Math.round(total) || 0));
+          correct = Math.max(0, Math.min(total, Math.round(correct) || 0));
+          if (!total || !initData()) return null;
+          topic = String(topic || "").toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 40);
+          sid = sid || newSid();
+          var key = kind + "|" + topic + "|" + correct + "|" + total, now = Date.now();
+          if (seen[sid] || (key === last.k && now - last.t < 2500)) return sid;    // двойное срабатывание
+          seen[sid] = 1; last = { k: key, t: now };
+          var ev = { session_id: sid, subject: SUBJ, kind: kind, correct: correct, total: total, topic: topic, ts: now };
+          var q = qGet(); q.push(ev); qSet(q);
+          deliver(ev, 3);
+          return sid;
+        } catch (e) { return null; }
+      },
+      // при открытии: досылаем то, что не дошло
+      flush: function () {
+        try {
+          var now = Date.now(), q = qGet().filter(function (x) { return x && x.session_id && now - (x.ts || 0) < MAX_AGE; });
+          qSet(q);
+          q.forEach(function (ev, i) { setTimeout(function () { deliver(ev, 1); }, 400 * i); });
+        } catch (e) {}
+      },
+      // не дошедшее до дневника — в sendData боту (бот досылает с тем же session_id)
+      pending: function () {
+        try {
+          return qGet().slice(-12).map(function (x) {
+            return [x.session_id, x.kind === "game" ? "g" : "l", x.topic || null, x.correct, x.total];
+          });
+        } catch (e) { return []; }
+      }
+    };
+  })();
 
 /* ============================================================
    ЗАКОНЧИТЬ: итог занятия уходит боту (sendData).
@@ -1283,6 +1362,7 @@ function payload() {
     r: Object.entries(r).slice(-60).map(([w, ok]) => [w, ok ? 1 : 0]),
     m: pend.m + Math.round((Date.now() - S.started) / 60000),
     w: Object.entries(wm).slice(-80).map(([en, v]) => [en, v[0], v[1]]),
+    ev: DIARY.pending(),       // что не дошло до дневника — досылает бот (тот же session_id)
   };
 }
 function finishSession() {
@@ -1313,6 +1393,7 @@ function finishSession() {
   }
   DATA.lessons.forEach(l => l.words.concat(l.extra).forEach(w => { ALL[w.en] = Object.assign({ lesson: l.id }, w); }));
   wbInit();
+  DIARY.flush();
   P = await loadP();
   save();
   const go = URLP.get("go");
