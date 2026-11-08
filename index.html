@@ -882,6 +882,16 @@ function wbInit() {
 const wbFlown = en => { const s = P.wb[en]; return !!s && s.tr >= 2 && s.sp >= 2; };
 const wbWeak = w => { const s = P.wb[w.en]; return !!s && s.miss > 0 && !wbFlown(w.en); };
 const wbFlownCount = list => list.filter(w => wbFlown(w.en)).length;
+// слова пройденных глав, которые ещё не отлетают (tid — одна тема, без tid — все темы; без дублей)
+function wbPending(tid) {
+  const out = [], seen = new Set();
+  (tid ? [WB.topicById[tid]] : WB.topics).forEach(t => wbChapters(t).forEach((c, i) => {
+    if (!P.wbs.includes(t.id + ":" + i)) return;
+    c.forEach(w => { if (!seen.has(w.en) && !wbFlown(w.en)) { seen.add(w.en); out.push(w); } });
+  }));
+  return out;
+}
+const wbStarsLine = n => `${n} ${plural(n, "слово ждёт", "слова ждут", "слов ждут")} звёздочку`;
 function wbRecord(en, ok, kind) {
   const w = P.wb[en] || (P.wb[en] = { tr: 0, sp: 0, miss: 0, last: "" });
   const key = kind === "sp" ? "sp" : "tr";
@@ -935,7 +945,7 @@ function wbHint(w) {          // подсказка про слово этого
 /* ---------- экран «Тетрадь» ---------- */
 function wbHome() {
   stopTimer();
-  const all = WB.all, n = wbFlownCount(all), weak = all.filter(wbWeak).length, rec = P.records.wb_speed;
+  const all = WB.all, n = wbFlownCount(all), weak = all.filter(wbWeak).length, rec = P.records.wb_speed, stars = wbPending().length;
   render(`${topBar(n, all.length, "📒 Отлетают: " + n + " из " + all.length)}
     <h1>📒 Тетрадь</h1>
     ${coach("Слова из твоей тетради. Выучим их так, чтобы они <b>отлетали от зубов</b>! Отлетело: <b>" + n + " из " + all.length + "</b> ☕")}
@@ -946,6 +956,7 @@ function wbHome() {
         <span class="st">${P.wbs.includes(t.id) ? "✅ " : ""}⭐ ${f}/${t.words.length}</span></button>`;
     }).join("")}</div>
     <div class="grid">
+      ${stars ? `<button class="card wide" data-act="stars"><span class="em">⭐</span><span class="tx"><span>Заработай больше звёзд</span><small>${wbStarsLine(stars)}</small></span></button>` : ""}
       <button class="card" data-act="weak"><span class="em">🔥</span><span>Слабые слова</span><small>${weak ? weak + " " + plural(weak, "слово", "слова", "слов") : "пока нет"}</small></button>
       <button class="card" data-act="big"><span class="em">🏆</span><span>Большой диктант</span><small>15 слов</small></button>
       <button class="card" data-act="twins"><span class="em">👯</span><span>Близнецы</span></button>
@@ -953,7 +964,7 @@ function wbHome() {
       <button class="card" data-act="spell"><span class="em">✍️</span><span>Собери слово</span></button>
       <button class="card" data-act="speed"><span class="em">⚡</span><span>Скоростной раунд</span>${rec ? `<small>🏆 ${rec}</small>` : ""}</button>
     </div>`, {
-    topic: id => wbTopic(id), weak: wbWeakRun, big: wbBigDictation, twins: wbTwinsRun, phrases: wbPhrasesRun, spell: wbSpellRun, speed: wbSpeed,
+    topic: id => wbTopic(id), weak: wbWeakRun, stars: () => wbStarsRun(), big: wbBigDictation, twins: wbTwinsRun, phrases: wbPhrasesRun, spell: wbSpellRun, speed: wbSpeed,
   }, home);
 }
 function wbChapters(t) {      // главы по 8 слов (поровну, чтобы не было крошечной последней)
@@ -964,17 +975,19 @@ function wbChapters(t) {      // главы по 8 слов (поровну, ч�
 }
 function wbTopic(tid) {
   stopTimer();
-  const t = WB.topicById[tid], chs = wbChapters(t), f = wbFlownCount(t.words);
+  const t = WB.topicById[tid], chs = wbChapters(t), f = wbFlownCount(t.words), stars = wbPending(tid).length;
   render(`${topBar(f, t.words.length, t.emoji + " " + esc(t.title) + " · ⭐ " + f + "/" + t.words.length)}
     <h1>${t.emoji} ${esc(t.title)}</h1>
     ${P.wbs.includes(tid) ? `<div class="stamp">✅ Штамп получен</div>` : ""}
     <div class="list">
       <button class="item" data-act="rule"><span class="n" style="font-size:30px">📖</span><span class="grow">Правило</span></button>
+      ${stars ? `<button class="item" data-act="stars"><span class="n" style="font-size:30px">⭐</span><span class="grow">Заработай больше звёзд<div class="muted" style="font-size:20px">${wbStarsLine(stars)}</div></span><span class="st">▶️</span></button>` : ""}
       ${chs.map((c, i) => `<button class="item" data-act="ch" data-arg="${i}"><span class="n">${i + 1}</span>
         <span class="grow">Глава ${i + 1}<div class="muted" style="font-size:20px">${c.length} ${plural(c.length, "слово", "слова", "слов")} · ⭐ ${wbFlownCount(c)}/${c.length}</div></span>
         <span class="st">${P.wbs.includes(tid + ":" + i) ? "✅" : "▶️"}</span></button>`).join("")}
     </div>`, {
     rule: () => wbRuleCard(t, 0, 0, () => wbTopic(tid), () => wbTopic(tid)),
+    stars: () => wbStarsRun(tid),
     ch: i => wbChapter(tid, +i),
   }, wbHome);
 }
@@ -1184,6 +1197,22 @@ function wbFix(t, idx) {      // «Закрепить»: ещё по одном�
     addStars(1);
     wbEnd("✍️ Слова закреплены", `С первого раза: ${ok} из ${n}. Теперь отлетают ${wbFlownCount(words)} из ${words.length} слов.`, () => wbFix(t, idx), "", ["lesson_done", ok, n, "wb_fix"]);
   }, () => wbTopic(t.id));
+}
+function wbStarsRun(tid) {      // «Заработай больше звёзд»: ровно столько заданий, сколько слову не хватает до звезды
+  const back = () => (tid ? wbTopic(tid) : wbHome());
+  const list = shuffle(wbPending(tid)).slice(0, 10);
+  if (!list.length) { toast("Все слова уже отлетают — ура! 🎉"); back(); return; }
+  const modes = shuffle(["build", "dict", "gap"]), steps = [];
+  let m = 0;
+  list.forEach(w => {
+    const s = P.wb[w.en] || { tr: 0, sp: 0 };
+    for (let i = 0; i < Math.max(0, 2 - s.sp); i++) steps.push(["spell", w, modes[m++ % 3]]);
+    for (let i = 0; i < Math.max(0, 2 - s.tr); i++) steps.push(["ru", w]);
+  });
+  wbRun(wbMix(steps), { pool: tid ? WB.topicById[tid].words : WB.all, topic: tid ? WB.topicById[tid] : null }, (ok, n) => {
+    addStars(1);
+    wbEnd("⭐ Звёздочки заработаны", `С первого раза: ${ok} из ${n}. Теперь отлетают ${wbFlownCount(list)} из ${list.length} слов.`, () => wbStarsRun(tid), "", ["lesson_done", ok, n, "wb_stars"]);
+  }, back);
 }
 function wbEnd(title, line, again, rec, res) {      // res: [тип, верно, всего, topic] — итог в дневник
   if (res) DIARY.record(res[0], res[1], res[2], res[3]);
