@@ -2,139 +2,197 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Miss Lily — английский</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Seymour+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,700;0,800;0,900;1,900&display=swap" rel="stylesheet">
 <style>
-/* ===== Оформление «Чаепитие в Лондоне» ===== */
+/* ===== Оформление «Маленький Лондон» (зайка Мисс Лили) ===== */
 :root{
-  --bg:#fbf3e3; --ink:#1d2b53; --soft:#5a6385; --panel:#1d2b53; --panel-ink:#fff;
-  --red:#c8102e; --red2:#a00d25; --win:#ffe9a8; --gold:#ffcf33; --card:#fff;
-  --ok:#2e9e5b; --line:#1d2b53; --shadow:rgba(29,43,83,.25); --sky:#1d2b53;
+  --ink:#1d2b53; --soft:#5a6385; --glass:rgba(255,248,234,.94); --card:#fffaf0;
+  --panel:#1d2b53; --panel-ink:#fff; --red:#c8102e; --red2:#9c0c24; --win:#ffe9a8; --gold:#ffcf33;
+  --ok:#2e9e5b; --line:#1d2b53; --shadow:rgba(10,16,48,.4); --veil:rgba(8,14,44,.06); --tabbg:#1b2d63;
 }
 html.dark{
-  --bg:#10172e; --ink:#f4ecd8; --soft:#b9bfd8; --panel:#26355f; --panel-ink:#fff;
-  --red:#d62a45; --red2:#a8182f; --win:#ffe9a8; --gold:#ffcf33; --card:#1b2546;
-  --ok:#3fbf75; --line:#8f9cc8; --shadow:rgba(0,0,0,.45); --sky:#26355f;
+  --ink:#f6eedc; --soft:#b9bfd8; --glass:rgba(18,26,60,.9); --card:#222e5c;
+  --panel:#2b3a6e; --red:#e03a55; --red2:#a8182f; --win:#ffe9a8; --ok:#3fbf75; --line:#8f9cc8;
+  --shadow:rgba(0,0,0,.6); --veil:rgba(4,8,30,.62); --tabbg:#121c44;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{background:var(--bg);color:var(--ink);font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;overflow-x:hidden}
-body{min-height:100vh}
+html{background:#0e1636}
+html,body{color:var(--ink);font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;overflow-x:hidden}
+body{min-height:100vh;position:relative}
+/* фон: Лондон под дождём (телефон / Mac); вечерний — тот же фон под тёмной вуалью */
+body::before{content:"";position:fixed;inset:0;z-index:-2;background:#0e1636 url(img/bg_phone.webp) center top/cover no-repeat}
+body::after{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(180deg,var(--veil),var(--veil));pointer-events:none}
+html.dark body::before{filter:brightness(.62) saturate(.85)}
+@media (min-width:700px){body::before{background-image:url(img/bg_mac.webp)}}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
-#app{max-width:480px;margin:0 auto;padding:14px 14px 92px;display:flex;flex-direction:column;gap:12px;min-height:100vh;position:relative}
-.sky{position:fixed;left:0;right:0;bottom:0;height:64px;pointer-events:none;z-index:0;display:flex;justify-content:center}
-.sky svg{width:100%;max-width:480px;height:64px}
+img{-webkit-user-drag:none;user-select:none}
+#app{max-width:500px;margin:0 auto;padding:14px 14px 104px;display:flex;flex-direction:column;gap:12px;min-height:100vh;position:relative}
 #app>*{position:relative;z-index:1}
-h1,.ttl{font-family:'Nunito',sans-serif;font-weight:900;font-size:26px;line-height:1.2;color:var(--red)}
-html.dark h1,html.dark .ttl{color:#ff6b80}
+h1,.ttl{font-family:'Nunito',sans-serif;font-weight:900;font-size:26px;line-height:1.2;color:var(--red);background:var(--glass);border-radius:20px;padding:8px 16px;box-shadow:0 5px 14px var(--shadow)}
+html.dark h1,html.dark .ttl{color:#ff8a9b}
 .muted{color:var(--soft);font-size:20px}
+#app>p.muted,#app>.muted{background:var(--glass);border-radius:18px;padding:10px 14px;box-shadow:0 4px 12px var(--shadow)}
 
-/* шапка */
-.hdr{display:flex;gap:10px;align-items:center}
-.avatar{width:76px;height:76px;border-radius:50%;font-size:44px;display:grid;place-items:center;flex:none;background:var(--red);border:4px solid var(--line)}
-.avatar.sm{width:58px;height:58px;font-size:32px}
-.hb{flex:1;min-width:0}
-.name{font-family:'Seymour One',sans-serif;font-size:20px;color:var(--red);margin-bottom:4px}
-html.dark .name{color:#ff6b80}
-.bubble{background:var(--card);border:3px solid var(--line);border-radius:18px 18px 18px 4px;padding:8px 12px;font-size:20px;line-height:1.25}
+/* шапка главной: зайка + облачко Hello! */
+.hdr{display:flex;align-items:flex-end;gap:2px;min-height:212px;margin-top:2px}
+.hdr .bunny{height:212px;width:auto;flex:none;filter:drop-shadow(0 8px 10px rgba(0,0,0,.5));margin-left:-4px}
+.cloud{flex:1;min-width:0;position:relative;background:#fffaf0;color:#1d2b53;border-radius:36px;padding:10px 16px 14px;margin-bottom:70px;box-shadow:0 8px 20px var(--shadow),inset 0 -6px 0 rgba(200,160,110,.18)}
+.cloud:before{content:"";position:absolute;left:-10px;bottom:16px;width:26px;height:26px;background:#fffaf0;transform:rotate(45deg);border-radius:4px}
+.cloud .nm{font-size:15px;font-weight:900;letter-spacing:2px;color:var(--red)}
+.cloud .hello{font-size:38px;font-weight:900;line-height:1.05;font-style:italic;color:#1d2b53}
+.cloud .hello i{font-style:normal;color:var(--red);font-size:24px}
+.cloud .sub{font-size:18px;line-height:1.2;margin-top:4px;color:#3a4470}
+.bubble{background:var(--glass);color:var(--ink);border-radius:22px;padding:9px 14px;font-size:20px;line-height:1.25;box-shadow:0 5px 14px var(--shadow);position:relative}
 .bubble b{color:var(--red)} html.dark .bubble b{color:#ff8a9b}
-.strip{background:var(--panel);color:var(--panel-ink);border-radius:16px;padding:8px 12px}
-.strip .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.cups{font-size:23px;letter-spacing:1px;white-space:nowrap}
-.bar{height:14px;border-radius:9px;margin-top:6px;overflow:hidden;background:#3a4a7a}
-.bar i{display:block;height:100%;border-radius:9px;background:var(--gold);transition:width .3s}
 
-/* карточки-автобусы */
+/* карточка текущего урока */
+.lesson{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:linear-gradient(180deg,#fffdf6,#f4e6cb);color:#1d2b53;border:2px solid #fff;border-radius:30px;padding:10px 12px 10px 10px;box-shadow:0 10px 22px var(--shadow),inset 0 -6px 0 rgba(190,150,100,.25);margin-top:-44px}
+.lesson .ic{width:82px;height:auto;flex:none;filter:drop-shadow(0 4px 4px rgba(0,0,0,.25))}
+.lesson .lt{flex:1;min-width:0}
+.lesson .lt b{display:block;font-size:28px;line-height:1.05}
+.lesson .lt small{display:block;font-size:17px;color:#4a5280;line-height:1.15;margin:1px 0 4px}
+.pbar{display:flex;align-items:center;gap:8px}
+.pbar .tr2{flex:1;height:14px;border-radius:9px;background:#e6dcc8;overflow:hidden;box-shadow:inset 0 2px 3px rgba(0,0,0,.18)}
+.pbar .tr2 i{display:block;height:100%;border-radius:9px;background:linear-gradient(#ff5252,#c8102e)}
+.pbar span{font-size:18px;color:#4a5280}
+.play{width:66px;height:66px;border-radius:50%;flex:none;position:relative;background:radial-gradient(circle at 35% 25%,#ff7070,#d11d33 55%,#a10d24);box-shadow:0 6px 12px rgba(120,0,20,.5),inset 0 3px 0 rgba(255,255,255,.5),inset 0 -5px 0 rgba(0,0,0,.2);border:3px solid #fff3}
+.play:after{content:"";position:absolute;left:26px;top:19px;border-left:23px solid #fff;border-top:14px solid transparent;border-bottom:14px solid transparent}
+
+/* ряд звёзд */
+.starrow{display:flex;align-items:center;gap:4px;background:linear-gradient(180deg,rgba(90,60,70,.82),rgba(48,32,46,.88));border:2px solid rgba(255,255,255,.25);border-radius:28px;padding:8px 10px;box-shadow:0 6px 16px var(--shadow)}
+.starrow .cnt{display:flex;align-items:center;gap:2px;background:#4a2326;border:3px solid #f2b928;border-radius:22px;padding:1px 12px 1px 2px;color:#fff;font-size:26px;font-weight:900;margin-right:4px}
+.starrow img{width:44px;height:auto;flex:none}
+.starrow .cnt img{width:40px}
+.starrow .st1{width:40px;height:40px;object-fit:contain}
+.starrow .gift{margin-left:auto;width:50px}
+
+/* плитки разделов и игр */
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.card{background:var(--red);color:#fff;border-radius:22px 22px 14px 14px;border-top:16px solid var(--red2);box-shadow:inset 0 -6px 0 rgba(0,0,0,.18);min-height:112px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;font-size:21px;font-weight:900;position:relative}
-.card:before{content:"";position:absolute;top:-12px;left:12px;right:12px;height:8px;background:repeating-linear-gradient(90deg,var(--win) 0 22px,transparent 22px 30px);border-radius:3px}
-.card .em{font-size:40px;line-height:1.1}
-.card small{font-size:20px;font-weight:800;opacity:.9}
-.card.wide{grid-column:span 2;flex-direction:row;gap:14px;font-size:25px}
-.card.wide .em{font-size:48px}
+.card{--c1:#ff8aa0;--c2:#e2475f;color:#fff;border-radius:28px;border:2px solid rgba(255,255,255,.6);background:linear-gradient(165deg,var(--c1),var(--c2));min-height:132px;padding:10px 8px 10px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;text-align:center;font-size:23px;font-weight:900;position:relative;overflow:hidden;box-shadow:0 10px 20px var(--shadow),inset 0 4px 0 rgba(255,255,255,.55),inset 0 -10px 16px rgba(0,0,0,.22);text-shadow:0 2px 3px rgba(0,0,0,.45)}
+.card:after{content:"";position:absolute;left:8px;right:8px;top:4px;height:42%;border-radius:22px 22px 60% 60%;background:linear-gradient(rgba(255,255,255,.38),rgba(255,255,255,0));pointer-events:none}
+.card .em{display:flex;align-items:center;justify-content:center;line-height:1;font-size:44px;flex:1;min-height:70px}
+.card .ic{width:76px;height:auto;filter:drop-shadow(0 5px 5px rgba(0,0,0,.4))}
+.card small{font-size:17px;font-weight:800;opacity:.95;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.card.blue{--c1:#58b4ff;--c2:#2468d6}
+.card.purple{--c1:#b57cf5;--c2:#6a35c7}
+.card.gold{--c1:#ffd25a;--c2:#e8941a}
+.card.green{--c1:#5ed08a;--c2:#1f8f52}
+.card.pink{--c1:#ff8aa0;--c2:#df3d5c}
+.card.wide{grid-column:span 2;flex-direction:row;justify-content:flex-start;gap:12px;font-size:24px;min-height:96px;padding:10px 16px}
+.card.wide .em{flex:none;min-height:0}
+.card.wide .ic{width:68px}
 .card.wide .tx{display:flex;flex-direction:column;align-items:flex-start;text-align:left}
-.card.navy{background:var(--panel);border-top-color:#121c3a;min-height:84px;font-size:20px}
-html.dark .card.navy{border-top-color:#1a2547}
-.card.navy .em{font-size:32px}
-.card.done{background:#2b7a4b;border-top-color:#1f5c38}
-.card:active,.opt:active,.btn:active{transform:translateY(2px)}
+.card.navy{--c1:#4a64b8;--c2:#1f2f6a;min-height:80px;font-size:20px}
+.card.navy .ic{width:54px}
+.card.done{--c1:#5ed08a;--c2:#1f8f52}
+.card:active,.opt:active,.btn:active,.lesson:active{transform:translateY(2px)}
+
+/* нижняя панель вкладок */
+#tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:10px;width:min(500px,calc(100% - 24px));display:flex;justify-content:space-around;background:linear-gradient(180deg,#2c478d,var(--tabbg));border:2px solid rgba(255,255,255,.4);border-radius:30px;padding:7px 4px 6px;z-index:6;box-shadow:0 8px 20px rgba(0,0,0,.5),inset 0 2px 0 rgba(255,255,255,.25)}
+#tabs[hidden]{display:none}
+#tabs button{display:flex;flex-direction:column;align-items:center;gap:1px;color:#b9c6f2;font-size:13px;font-weight:900;min-width:68px;padding:2px 6px;position:relative}
+#tabs svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#tabs button.on{color:#fff}
+#tabs button.on svg{filter:drop-shadow(0 0 6px #ffcf33)}
+#tabs button.on:after{content:"";position:absolute;bottom:-3px;left:20%;right:20%;height:3px;border-radius:2px;background:#ffcf33}
 
 /* экран задания */
-.top{display:flex;align-items:center;gap:8px}
-.back{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-size:26px;font-weight:900;flex:none;background:var(--panel);color:#fff}
-.prog{flex:1;font-size:20px;font-weight:900;min-width:0}
-.prog .bar{background:#cfd3e2} html.dark .prog .bar{background:#3a4a7a}
-.streak{font-size:22px;font-weight:900;padding:8px 12px;border-radius:30px;flex:none;background:var(--red);color:#fff}
-.coach{display:flex;gap:10px;align-items:center}
-.coach .bubble{flex:1}
-.stage{display:flex;flex-direction:column;align-items:center;gap:12px;padding:6px 0}
-.pic{min-width:170px;min-height:150px;padding:10px 18px;display:grid;place-items:center;font-size:96px;line-height:1.05;background:#fff;border:10px solid #fff;outline:4px dashed var(--red);outline-offset:-18px;box-shadow:0 8px 18px var(--shadow);transform:rotate(-2deg);color:#1d2b53;text-align:center}
+.top{display:flex;align-items:center;gap:8px;background:rgba(14,22,58,.84);border:2px solid rgba(255,255,255,.22);border-radius:26px;padding:6px 8px;box-shadow:0 6px 16px var(--shadow);color:#fff}
+.back{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-size:26px;font-weight:900;flex:none;background:linear-gradient(#5a78d0,#2b3f86);color:#fff;border:2px solid rgba(255,255,255,.5);box-shadow:inset 0 2px 0 rgba(255,255,255,.4)}
+.prog{flex:1;font-size:20px;font-weight:900;min-width:0;color:#fff}
+.bar{height:14px;border-radius:9px;margin-top:6px;overflow:hidden;background:#3a4a7a;box-shadow:inset 0 2px 3px rgba(0,0,0,.35)}
+.bar i{display:block;height:100%;border-radius:9px;background:linear-gradient(#ffe27a,#f2a81d);transition:width .3s}
+.streak{font-size:22px;font-weight:900;padding:8px 12px;border-radius:30px;flex:none;background:linear-gradient(#ff6a6a,#c8102e);color:#fff;box-shadow:inset 0 2px 0 rgba(255,255,255,.45)}
+.coach{display:flex;gap:6px;align-items:flex-end}
+.coach .cb{width:96px;flex:none;display:flex;align-items:flex-end;justify-content:center}
+.coach .bunny{height:136px;width:auto;max-width:96px;object-fit:contain;filter:drop-shadow(0 5px 6px rgba(0,0,0,.45))}
+.coach .bunny.pop{animation:pop .45s ease}
+@keyframes pop{0%{transform:scale(.8) translateY(8px)}60%{transform:scale(1.08)}100%{transform:none}}
+.coach .bubble{flex:1;margin-bottom:12px;border-radius:24px 24px 24px 6px}
+.coach.solo .bubble{margin-bottom:0;border-radius:24px}
+.stage:empty{display:none}
+.stage{display:flex;flex-direction:column;align-items:center;gap:12px;padding:14px 10px;background:var(--glass);border-radius:28px;box-shadow:0 8px 20px var(--shadow)}
+.pic{min-width:170px;min-height:150px;padding:10px 18px;display:grid;place-items:center;font-size:96px;line-height:1.05;background:#fff;border:10px solid #fff;outline:4px dashed var(--red);outline-offset:-18px;box-shadow:0 8px 18px var(--shadow);transform:rotate(-2deg);color:#1d2b53;text-align:center;border-radius:6px}
 .pic.txt{font-size:40px;font-weight:900;padding:26px 24px;max-width:100%;word-break:break-word}
 .pic.ru{font-size:32px}
 .word{font-size:40px;font-weight:900;text-align:center;line-height:1.1;word-break:break-word}
 .tr{font-size:24px;color:var(--soft);text-align:center}
 .ru{font-size:24px;text-align:center}
-.say{min-height:56px;padding:0 22px;border-radius:30px;display:inline-flex;align-items:center;gap:8px;font-size:22px;font-weight:900;background:var(--panel);color:#fff}
+.say{min-height:56px;padding:0 22px;border-radius:30px;display:inline-flex;align-items:center;gap:8px;font-size:22px;font-weight:900;background:linear-gradient(#4d73d6,#27408f);color:#fff;box-shadow:0 5px 0 #17275c,inset 0 2px 0 rgba(255,255,255,.35)}
 .opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .opts.one{grid-template-columns:1fr}
-.opt{min-height:78px;padding:8px 10px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:36px;font-weight:900;position:relative;background:var(--card);color:var(--ink);border:4px solid var(--line);border-radius:14px;box-shadow:0 6px 0 var(--line);text-align:center;line-height:1.1;word-break:break-word}
+.opt{min-height:78px;padding:8px 10px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:36px;font-weight:900;position:relative;background:linear-gradient(180deg,#fffdf6,var(--card));color:var(--ink);border:4px solid var(--line);border-radius:22px;box-shadow:0 6px 0 var(--line),0 10px 14px var(--shadow);text-align:center;line-height:1.1;word-break:break-word}
+html.dark .opt{background:linear-gradient(180deg,#2c3a72,var(--card))}
 .opt.small{font-size:26px}
 .opt.stack{flex-direction:column;gap:2px}
 .opt .oem{font-size:30px}
 .opt.tried{opacity:.55}
 .opt.tried:after{content:attr(data-hint);position:absolute;right:8px;top:4px;font-size:22px}
-.opt.right{background:var(--ok);border-color:var(--ok);color:#fff;box-shadow:0 6px 0 #1f6e3f}
-.opt.sel{background:var(--gold);color:#1d2b53}
+.opt.right{background:linear-gradient(#58d68d,var(--ok));border-color:var(--ok);color:#fff;box-shadow:0 6px 0 #1f6e3f}
+.opt.sel{background:linear-gradient(#ffe27a,var(--gold));color:#1d2b53}
 .opt[disabled]{pointer-events:none}
-.btn{min-height:64px;padding:10px 18px;border-radius:18px;font-size:22px;font-weight:900;background:var(--red);color:#fff;box-shadow:0 6px 0 var(--red2);width:100%}
-.btn.navy{background:var(--panel);box-shadow:0 6px 0 #0e1630}
-.btn.green{background:var(--ok);box-shadow:0 6px 0 #1f6e3f}
-.btn.ghost{background:var(--card);color:var(--ink);border:3px solid var(--line);box-shadow:0 5px 0 var(--line)}
+.btn{min-height:64px;padding:10px 18px;border-radius:24px;font-size:22px;font-weight:900;background:linear-gradient(#ff5a6e,var(--red));color:#fff;box-shadow:0 6px 0 var(--red2),0 10px 14px var(--shadow),inset 0 2px 0 rgba(255,255,255,.4);width:100%;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.btn.navy{background:linear-gradient(#4f69c0,#26397f);box-shadow:0 6px 0 #0e1630,0 10px 14px var(--shadow),inset 0 2px 0 rgba(255,255,255,.3)}
+.btn.green{background:linear-gradient(#58d68d,var(--ok));box-shadow:0 6px 0 #1f6e3f,0 10px 14px var(--shadow),inset 0 2px 0 rgba(255,255,255,.4)}
+.btn.ghost{background:var(--glass);color:var(--ink);border:3px solid var(--line);box-shadow:0 5px 0 var(--line);text-shadow:none}
+.btn.undo{background:linear-gradient(#ffe9a8,#ffc94d);color:#4a2a00;box-shadow:0 6px 0 #b98412,0 10px 14px var(--shadow);text-shadow:none;font-size:24px;min-height:68px;animation:pop .4s ease}
 .row2{display:flex;gap:10px}.row2>*{flex:1}
-.hint{min-height:56px;padding:0 18px;border-radius:30px;font-size:21px;background:var(--gold);color:#1d2b53;align-self:center}
+.hint{min-height:56px;padding:0 18px;border-radius:30px;font-size:21px;background:linear-gradient(#ffe27a,var(--gold));color:#1d2b53;align-self:center;box-shadow:0 4px 0 #b98412,0 8px 12px var(--shadow)}
 .tokens{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;min-height:70px}
-.tok{min-height:60px;padding:4px 14px;border-radius:14px;font-size:36px;font-weight:900;background:var(--card);color:var(--ink);border:3px solid var(--line);box-shadow:0 5px 0 var(--line)}
-.answer{min-height:84px;border:3px dashed var(--line);border-radius:16px;padding:8px;display:flex;flex-wrap:wrap;gap:8px;align-content:center;justify-content:center}
+.tok{min-height:60px;padding:4px 14px;border-radius:16px;font-size:36px;font-weight:900;background:linear-gradient(#fffdf6,var(--card));color:var(--ink);border:3px solid var(--line);box-shadow:0 5px 0 var(--line),0 8px 10px var(--shadow)}
+.answer{min-height:84px;border:3px dashed var(--line);background:var(--glass);border-radius:20px;padding:8px;display:flex;flex-wrap:wrap;gap:8px;align-content:center;justify-content:center;box-shadow:0 6px 14px var(--shadow)}
 .answer .tok{background:var(--win);color:#1d2b53}
 .list{display:flex;flex-direction:column;gap:10px}
-.item{display:flex;align-items:center;gap:12px;min-height:64px;padding:10px 14px;border-radius:16px;background:var(--card);border:3px solid var(--line);font-size:21px;text-align:left}
+.item{display:flex;align-items:center;gap:12px;min-height:64px;padding:10px 14px;border-radius:22px;background:linear-gradient(#fffdf6,var(--card));border:3px solid var(--line);font-size:21px;text-align:left;box-shadow:0 5px 0 var(--line),0 8px 12px var(--shadow);color:var(--ink)}
+html.dark .item{background:linear-gradient(#2c3a72,var(--card))}
 .item .n{font-weight:900;font-size:22px;color:var(--red);min-width:30px}
-.item.cur{border-color:var(--red);box-shadow:0 0 0 3px var(--red)}
+html.dark .item .n{color:#ff8a9b}
+.item.cur{border-color:var(--red);box-shadow:0 0 0 3px var(--red),0 8px 12px var(--shadow)}
 .item .st{margin-left:auto;font-size:22px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{padding:6px 12px;border-radius:20px;background:var(--card);border:2px solid var(--line);font-size:20px}
+.chip{padding:6px 12px;border-radius:20px;background:var(--card);border:2px solid var(--line);font-size:20px;color:var(--ink);box-shadow:0 3px 8px var(--shadow)}
 .chip.got{background:var(--win);color:#1d2b53;border-color:var(--gold)}
-.big{font-size:56px;text-align:center}
+.hero{display:flex;justify-content:center;align-items:flex-end;gap:0;min-height:150px;margin-top:4px}
+.hero .bunny{height:210px;width:auto;filter:drop-shadow(0 8px 10px rgba(0,0,0,.5));animation:pop .6s ease}
+.hero .aw{width:96px;height:auto;margin-left:-14px;margin-bottom:6px;filter:drop-shadow(0 6px 8px rgba(0,0,0,.5))}
 .center{text-align:center}
-.findtask{font-size:26px;line-height:1.3;text-align:center;background:var(--card);border:3px solid var(--line);border-radius:18px;padding:16px}
+h1.center{align-self:stretch}
+p.center{background:var(--glass);border-radius:18px;padding:8px 12px;box-shadow:0 4px 12px var(--shadow)}
+.findtask{font-size:26px;line-height:1.3;text-align:center;background:var(--glass);border:3px solid var(--line);border-radius:24px;padding:16px;box-shadow:0 8px 20px var(--shadow)}
 .findtask b{font-size:36px;color:var(--red)} html.dark .findtask b{color:#ff8a9b}
-.toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);max-width:92%;background:var(--panel);color:#fff;padding:12px 16px;border-radius:16px;font-size:20px;z-index:20;box-shadow:0 8px 20px rgba(0,0,0,.3)}
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);max-width:92%;background:var(--panel);color:#fff;padding:12px 16px;border-radius:18px;font-size:20px;z-index:20;box-shadow:0 8px 20px rgba(0,0,0,.4)}
 .finish{position:fixed;left:0;right:0;bottom:12px;display:flex;justify-content:center;z-index:5;padding:0 14px;pointer-events:none}
+body.tabs .finish{bottom:92px}
 .finish[hidden]{display:none}
-.finish .btn{max-width:452px;pointer-events:auto}
+.finish .btn{max-width:472px;pointer-events:auto}
 /* 📒 тетрадь */
-.tile{min-width:56px;min-height:64px;padding:4px 10px;border-radius:14px;font-size:38px;font-weight:900;background:var(--card);color:var(--ink);border:3px solid var(--line);box-shadow:0 5px 0 var(--line)}
+.tile{min-width:56px;min-height:64px;padding:4px 10px;border-radius:16px;font-size:38px;font-weight:900;background:linear-gradient(#fffdf6,var(--card));color:var(--ink);border:3px solid var(--line);box-shadow:0 5px 0 var(--line),0 8px 10px var(--shadow)}
 .answer .tile{background:var(--win);color:#1d2b53}
 .answer .tile.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
 .hl{color:var(--red);text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:5px}
 html.dark .hl{color:#ff8a9b} .pic .hl,.opt .hl{color:#c8102e}
 .gap{display:inline-block;min-width:60px;height:38px;border-bottom:6px solid var(--red);vertical-align:-4px;margin:0 6px}
-.item .bar{background:#cfd3e2} html.dark .item .bar{background:#3a4a7a}
+.item .bar{background:#d8d2c2} html.dark .item .bar{background:#3a4a7a}
 .item .grow{flex:1;min-width:0;line-height:1.2}
 .chips.big .chip{min-height:56px;display:inline-flex;align-items:center;padding:6px 16px;font-size:22px}
-.stamp{align-self:center;transform:rotate(-4deg);border:5px double var(--ok);color:var(--ok);border-radius:16px;padding:10px 18px;font-size:26px;font-weight:900;text-align:center}
+.stamp{align-self:center;transform:rotate(-4deg);border:5px double var(--ok);color:var(--ok);background:var(--glass);border-radius:16px;padding:10px 18px;font-size:26px;font-weight:900;text-align:center;box-shadow:0 6px 14px var(--shadow)}
+@media (min-width:700px){
+  #app{max-width:540px;padding-top:24px}
+  .hdr .bunny{height:220px}
+}
 </style>
 </head>
 <body>
-<div class="sky" aria-hidden="true"><svg viewBox="0 0 340 64" preserveAspectRatio="xMidYMax meet"><g fill="var(--sky)">
-<rect x="0" y="36" width="40" height="28"/><polygon points="0,36 20,22 40,36"/>
-<rect x="46" y="8" width="22" height="56"/><polygon points="46,8 57,-4 68,8"/><circle cx="57" cy="22" r="7" fill="#ffcf33"/>
-<rect x="74" y="30" width="50" height="34"/><rect x="130" y="40" width="34" height="24"/>
-<rect x="250" y="26" width="44" height="38"/><path d="M300 64 a20 20 0 0 1 40 0z"/></g>
-<g><rect x="170" y="32" width="70" height="28" rx="6" fill="#c8102e"/><rect x="176" y="36" width="58" height="8" fill="#ffe9a8"/><rect x="176" y="48" width="58" height="6" fill="#ffe9a8"/>
-<circle cx="184" cy="61" r="5" fill="#1d2b53"/><circle cx="226" cy="61" r="5" fill="#1d2b53"/></g></svg></div>
+<nav id="tabs" hidden aria-label="Разделы">
+<button data-act="tab" data-arg="home" class="on"><svg viewBox="0 0 32 32"><path d="M4 15 16 4l12 11M7 13v14h18V13M13 27v-8h6v8"/></svg><span>Главная</span></button>
+<button data-act="tab" data-arg="topics"><svg viewBox="0 0 32 32"><path d="M16 8c-3-2-7-3-12-3v19c5 0 9 1 12 3 3-2 7-3 12-3V5c-5 0-9 1-12 3zM16 8v19"/></svg><span>Темы</span></button>
+<button data-act="tab" data-arg="games"><svg viewBox="0 0 32 32"><rect x="3" y="9" width="26" height="14" rx="7"/><path d="M10 13v6M7 16h6M21 15h.01M24 18h.01"/></svg><span>Игры</span></button>
+<button data-act="tab" data-arg="words"><svg viewBox="0 0 32 32"><path d="M9 5h14v7a7 7 0 0 1-14 0zM9 8H4v2a5 5 0 0 0 5 5M23 8h5v2a5 5 0 0 1-5 5M16 19v5M10 27h12"/></svg><span>Слова</span></button>
+</nav>
 <div id="app"><p class="muted center" style="margin-top:40vh">☕ Загружаю…</p></div>
 <div class="finish" id="finish" hidden><button class="btn green" data-act="finish">✅ Закончить</button></div>
 
@@ -151,6 +209,7 @@ const BOT_LINK = "https://t.me/tvoi_tutor_bot";
 const URLP = new URLSearchParams(location.search);
 const $app = document.getElementById("app");
 const $finish = document.getElementById("finish");
+const $tabs = document.getElementById("tabs");
 
 let DATA = null, ALL = {}, P = null;
 const S = { results: {}, games: [], lessons: [], wb: {}, started: Date.now(), streak: 0 };  // это занятие
@@ -161,7 +220,7 @@ function applyTheme() {
   if (IN_TG && TG.colorScheme) dark = TG.colorScheme === "dark";
   else if (window.matchMedia) dark = matchMedia("(prefers-color-scheme: dark)").matches;
   document.documentElement.classList.toggle("dark", dark);
-  if (IN_TG && TG.setHeaderColor) { try { TG.setHeaderColor(dark ? "#10172e" : "#fbf3e3"); TG.setBackgroundColor(dark ? "#10172e" : "#fbf3e3"); } catch (e) {} }
+  if (IN_TG && TG.setHeaderColor) { try { TG.setHeaderColor(dark ? "#0a1030" : "#1b2a5c"); TG.setBackgroundColor(dark ? "#0a1030" : "#1b2a5c"); } catch (e) {} }
 }
 if (TG) { try { TG.ready(); TG.expand(); TG.onEvent("themeChanged", applyTheme); } catch (e) {} }
 applyTheme();
@@ -173,6 +232,14 @@ const pick = a => a[Math.floor(Math.random() * a.length)];
 const ruShort = ru => String(ru).split(" (")[0];
 const today = () => new Date().toISOString().slice(0, 10);
 const kidName = () => { try { return (TG.initDataUnsafe.user.first_name || "").trim(); } catch (e) { return ""; } };
+/* картинки «Маленького Лондона»: иконки, награды, позы зайки (img/, пути относительные) */
+const ic = (n, c) => `<img class="ic ${c || ""}" src="img/ic_${n}.webp" alt="" draggable="false">`;
+const aw = (n, c) => `<img class="aw ${c || ""}" src="img/aw_${n}.webp" alt="" draggable="false">`;
+const bunny = (pose, c) => `<img class="bunny ${c || ""}" src="img/bunny_${pose}.webp" alt="Мисс Лили" draggable="false">`;
+["hello", "explain", "cheer", "think"].forEach(p => { try { new Image().src = "img/bunny_" + p + ".webp"; } catch (e) {} });
+const GAME_IC = { odd_one_out: "notebook", hot_cold: "tea", build_phrase: "abc", fast_translate: "book", yes_no: "game", remember_three: "cards", what_did_i_say: "headphones", find_at_home: "bus" };
+const GAME_COLOR = ["pink", "blue", "purple", "gold", "green"];
+const hero = (pose, award) => `<div class="hero">${bunny(pose)}${award ? aw(award) : ""}</div>`;
 const PRAISE = ["Умница! 🎉", "Супер! ⭐", "Yes! Отлично! 🎉", "Well done! 👏", "Brilliant! 💂", "Молодец! ☕"];
 function toast(html, ms) {
   const t = document.createElement("div"); t.className = "toast"; t.innerHTML = html;
@@ -311,6 +378,7 @@ function startTimer(fn) { stopTimer(); TIMER = setInterval(fn, 1000); }
 function render(html, acts, back) {
   try { speechSynthesis.cancel(); } catch (e) {}
   ACTS = acts || {}; onBack = back || null;
+  $tabs.hidden = true; document.body.classList.remove("tabs");
   $app.innerHTML = html;
   window.scrollTo(0, 0);
   if (IN_TG && TG.BackButton) { try { back ? TG.BackButton.show() : TG.BackButton.hide(); } catch (e) {} }
@@ -320,18 +388,32 @@ document.addEventListener("click", e => {
   const b = e.target.closest("[data-act]"); if (!b || b.disabled) return;
   const name = b.dataset.act, arg = b.dataset.arg;
   if (name === "finish") return finishSession();
+  if (name === "tab") return ({ home, topics: topicsScreen, games: gamesMenu, words: wordsScreen })[arg]();
   if (name === "back") return onBack ? onBack() : home();
   if (name === "say") return speak(b.dataset.text);
   if (ACTS[name]) ACTS[name](arg, b);
 });
 if (IN_TG && TG.BackButton) { try { TG.BackButton.onClick(() => (onBack ? onBack() : home())); } catch (e) {} }
+/* «↩ Ой, не туда!» — отмена случайного нажатия: одна на вопрос, ошибка не засчитывается */
+const UNDO_BTN = `<button class="btn undo" data-act="undo">↩ Ой, не туда!</button>`;
 const sayBtn = (text, label) => `<button class="say" data-act="say" data-text="${esc(text)}">🔊 ${label || "Послушать"}</button>`;
 const topBar = (k, n, extra) => `<div class="top"><button class="back" data-act="back" aria-label="Назад">←</button>
   <div class="prog">${extra || (k + " / " + n)}<div class="bar"><i style="width:${n ? Math.round(100 * k / n) : 0}%"></i></div></div>
   <div class="streak">🔥 ${S.streak}</div></div>`;
-const coach = text => `<div class="coach"><div class="avatar sm">👩🏼‍🦰</div><div class="bubble" id="say">${text}</div></div>`;
+const coach = (text, pose, solo) => `<div class="coach ${solo ? "solo" : ""}">${solo ? "" : `<div class="cb" id="cb">${bunny(pose || "explain")}</div>`}<div class="bubble" id="say">${text}</div></div>`;
+function poseFor(t) {   // какая поза зайки подходит к фразе
+  const x = String(t).replace(/<[^>]*>/g, "").trim();
+  if (/^(Умница|Супер|Yes!|Well done|Brilliant|Молодец|ДА!|Верно|Память|Ура)/.test(x)) return "cheer";
+  if (/^(Почти|Смотри|Отвлечёмся)/.test(x)) return "think";
+  return "explain";
+}
 function hideHint() { const h = document.querySelector(".hint"); if (h) h.remove(); }
-function setCoach(text) { const b = document.getElementById("say"); if (b) b.innerHTML = text; }
+function setCoach(text, pose) {
+  const b = document.getElementById("say"); if (b) b.innerHTML = text;
+  const im = document.querySelector("#cb img"); if (!im) return;
+  const p = pose || poseFor(text), src = "img/bunny_" + p + ".webp";
+  if (!im.src.endsWith(src)) { im.src = src; im.classList.remove("pop"); void im.offsetWidth; im.classList.add("pop"); }
+}
 
 /* ---------- главный экран ---------- */
 function cups() {
@@ -343,23 +425,26 @@ function home() {
   const L = lessonById(P.lesson) || DATA.lessons[0];
   const name = kidName();
   const allDone = P.done.length >= DATA.lessons.length && P.done.includes(P.lesson);
+  const nd = P.done.length, nl = DATA.lessons.length, today5 = Math.min(5, P.days[today()] || 0);
   render(`
-    <div class="hdr"><div class="avatar">👩🏼‍🦰</div><div class="hb"><div class="name">MISS LILY</div>
-      <div class="bubble">Hello${name ? ", " + esc(name) : ""}! ☕ ${allDone ? "Все темы пройдены! Повторим?" : "Едем на автобусе в урок " + L.id + "?"}</div></div></div>
-    <div class="strip"><div class="row"><span>Чай дня</span><span class="cups">${cups()}</span></div>
-      <div class="bar"><i style="width:${Math.min(100, 20 * (P.days[today()] || 0))}%"></i></div></div>
+    <div class="hdr">${bunny("hello")}<div class="cloud"><div class="nm">MISS LILY</div>
+      <div class="hello">Hello${name ? ", " + esc(name) : ""}! <i>♥</i></div>
+      <div class="sub">${allDone ? "Все темы пройдены! Повторим?" : "Едем на автобусе в урок " + L.id + "?"}</div></div></div>
+    <button class="lesson" data-act="lesson">${ic("book")}<span class="lt"><b>Урок ${L.id}</b><small>${esc(L.title)}</small>
+      <span class="pbar"><span class="tr2"><i style="width:${nl ? Math.round(100 * nd / nl) : 0}%"></i></span><span>${nd}/${nl}</span></span></span><span class="play"></span></button>
     <div class="grid">
-      <button class="card wide" data-act="lesson"><span class="em">🚌</span><span class="tx"><span>Урок ${L.id}</span><small>${esc(L.title)}</small></span></button>
-      <button class="card" data-act="games"><span class="em">🎮</span><span>Игры</span></button>
-      <button class="card" data-act="review"><span class="em">🔤</span><span>Повторить</span></button>
-      <button class="card" data-act="topics"><span class="em">🗺️</span><span>Темы</span><small>${P.done.length} из ${DATA.lessons.length}</small></button>
-      <button class="card" data-act="words"><span class="em">🎟️</span><span>Мои слова</span><small>${learnedCount()} ${plural(learnedCount(), "слово", "слова", "слов")}</small></button>
-      ${WB ? `<button class="card wide" data-act="wb"><span class="em">📒</span><span class="tx"><span>Тетрадь: исправляем тройки</span><small>${wbFlownCount(WB.all)} из ${WB.all.length} слов отлетают</small></span></button>` : ""}
-      <button class="card wide navy" data-act="chat"><span class="em">💬</span><span>В чате: подруга, истории, голос</span></button>
-    </div>`, {
+      <button class="card purple" data-act="games"><span class="em">${ic("game")}</span><span>Игры</span></button>
+      <button class="card pink" data-act="review"><span class="em">${ic("cards")}</span><span>Повторить</span></button>
+      <button class="card blue" data-act="topics"><span class="em">${ic("bus")}</span><span>Темы</span><small>${nd} из ${nl}</small></button>
+      <button class="card gold" data-act="words"><span class="em">${ic("abc")}</span><span>Мои слова</span><small>${learnedCount()} ${plural(learnedCount(), "слово", "слова", "слов")}</small></button>
+      ${WB ? `<button class="card wide green" data-act="wb"><span class="em">${ic("notebook")}</span><span class="tx"><span>Тетрадь: исправляем тройки</span><small>${wbFlownCount(WB.all)} из ${WB.all.length} слов отлетают</small></span></button>` : ""}
+      <button class="card wide navy" data-act="chat"><span class="em">${ic("mic")}</span><span>В чате: подруга, истории, голос</span></button>
+    </div>
+    <div class="starrow"><span class="cnt">${aw("star_gold")}${P.days[today()] || 0}</span>${[0, 1, 2, 3, 4].map(i => aw(i < today5 ? "star_gold" : "star_silver")).join("")}${aw("gift", "gift")}</div>`, {
     lesson: () => startLesson(P.lesson, "words"),
     games: gamesMenu, review: startReview, topics: topicsScreen, words: wordsScreen, chat: chatScreen, wb: wbHome,
   });
+  $tabs.hidden = false; document.body.classList.add("tabs");
 }
 
 /* ---------- темы ---------- */
@@ -407,10 +492,12 @@ function chatScreen() {
    ============================================================ */
 function ask(c) {
   // c: k,n,top, prompt, pic, picClass, say, options[{label,val,em,desc}], answer, item, hint, reveal, next(ok), oneCol, small
-  let tries = 0, over = false;
-  const long = c.options.some(o => String(o.label).length > 9);
+  let tries = 0, over = false, undoUsed = false, undoOn = false, lastTap = null;
+  const nbox = () => document.getElementById("nextbox");
+  const clearUndo = () => { if (undoOn) { undoOn = false; const nb = nbox(); if (nb) nb.innerHTML = ""; } };
+  const long = c.options.some(o => String(o.label).length > 9), mid = c.options.some(o => String(o.label).length > 6);
   const stack = c.options.some(o => o.showEm && o.em);
-  const opts = c.options.map((o, i) => `<button class="opt ${long || c.small ? "small" : ""} ${stack ? "stack" : ""}" data-act="pick" data-arg="${i}" data-hint="${esc(o.em || "")}">${o.showEm && o.em ? `<span class="oem">${o.em}</span>` : ""}${esc(o.label)}</button>`).join("");
+  const opts = c.options.map((o, i) => `<button class="opt ${long || mid || c.small ? "small" : ""} ${stack ? "stack" : ""}" data-act="pick" data-arg="${i}" data-hint="${esc(o.em || "")}">${o.showEm && o.em ? `<span class="oem">${o.em}</span>` : ""}${esc(o.label)}</button>`).join("");
   render(`${c.top || topBar(c.k, c.n)}
     ${coach(c.prompt)}
     <div class="stage">${c.pic ? `<div class="pic ${c.picClass || ""}">${c.pic}</div>` : ""}${c.say ? sayBtn(c.say) : ""}</div>
@@ -418,9 +505,17 @@ function ask(c) {
     ${c.hint ? `<button class="hint" data-act="hint">💡 Подсказка</button>` : ""}
     <div id="nextbox"></div>`, {
     hint: () => { if (!over) setCoach("💡 " + c.hint); },
+    undo: () => {
+      if (over || !undoOn || !lastTap) return;
+      tries = 0; undoUsed = true; undoOn = false;
+      lastTap.b.classList.remove("tried"); lastTap.b.disabled = false;
+      setCoach(lastTap.prev, "explain"); nbox().innerHTML = ""; lastTap = null;
+    },
     pick: (i, b) => {
       if (over) return;
       const o = c.options[+i];
+      const prevCoach = (document.getElementById("say") || {}).innerHTML || "";
+      clearUndo();
       if (o.val === c.answer) {
         over = true; b.classList.add("right"); haptic("success"); hideHint();
         record(c.item, tries === 0, c.kind);
@@ -435,6 +530,7 @@ function ask(c) {
       tries++; b.classList.add("tried"); b.disabled = true; haptic("warning");
       if (tries === 1) {
         setCoach("Почти! Давай проверим: " + (o.desc || esc(o.label)) + (c.hint ? ". " + c.hint : ""));
+        if (!undoUsed) { undoOn = true; lastTap = { b, prev: prevCoach }; nbox().innerHTML = UNDO_BTN; }
       } else {
         over = true; record(c.item, false, c.kind); hideHint();
         document.querySelectorAll(".opt").forEach((x, j) => { x.disabled = true; if (c.options[j].val === c.answer) x.classList.add("right"); });
@@ -477,7 +573,7 @@ function buildPhrase(p, k, n, next, back, top) {
   const right = tokensOf(p.en);
   let bank = shuffle(right.map((t, i) => ({ t, i })));
   if (bank.map(x => x.t).join(" ") === right.join(" ") && right.length > 1) bank.push(bank.shift());
-  let line = [], tries = 0;
+  let line = [], tries = 0, undoOn = false, undoUsed = false, snap = null, prevSnap = null, acts = 0;
   const item = { en: p.en, tr: p.tr, ru: p.ru, em: "", wb: p.wb };
   function draw() {
     render(`${top || topBar(k, n)}
@@ -485,9 +581,14 @@ function buildPhrase(p, k, n, next, back, top) {
       <div class="answer">${line.map((x, j) => `<button class="tok" data-act="out" data-arg="${j}">${esc(x.t)}</button>`).join("") || '<span class="muted">нажимай на слова по порядку 👇</span>'}</div>
       <div class="tokens">${bank.map((x, j) => `<button class="tok" data-act="in" data-arg="${j}">${esc(x.t)}</button>`).join("")}</div>
       <button class="hint" data-act="hint">💡 Подсказка</button>
-      <div id="nextbox"></div>`, {
-      in: j => { line.push(bank.splice(+j, 1)[0]); draw(); if (!bank.length) check(); },
-      out: j => { bank.push(line.splice(+j, 1)[0]); draw(); },
+      <div id="nextbox">${undoOn ? UNDO_BTN : ""}</div>`, {
+      undo: () => {
+        if (!undoOn || !snap) return;
+        tries = 0; undoUsed = true; undoOn = false; acts++;
+        line = snap.line; bank = snap.bank; snap = null; draw();
+      },
+      in: j => { acts++; undoOn = false; prevSnap = { line: line.slice(), bank: bank.slice() }; line.push(bank.splice(+j, 1)[0]); draw(); if (!bank.length) check(); },
+      out: j => { acts++; undoOn = false; bank.push(line.splice(+j, 1)[0]); draw(); },
       hint: () => setCoach(`💡 Фраза начинается с <b>«${esc(right[0])}»</b>, в ней ${right.length} ${plural(right.length, "слово", "слова", "слов")}.`),
     }, back || home);
   }
@@ -499,7 +600,8 @@ function buildPhrase(p, k, n, next, back, top) {
     }
     tries++; haptic("warning");
     if (tries === 1) {
-      setTimeout(() => { bank = shuffle(bank.concat(line)); line = []; draw();
+      const myActs = acts; snap = prevSnap;
+      setTimeout(() => { bank = shuffle(bank.concat(line)); line = []; undoOn = !undoUsed && !!snap && myActs === acts; draw();
         setCoach(`Почти! Давай проверим: фраза начинается с <b>«${esc(right[0])}»</b>${right.length > 2 ? ", потом <b>«" + esc(right[1]) + "»</b>" : ""}. Попробуй ещё!`); }, 700);
     } else {
       record(item, false);
@@ -561,9 +663,9 @@ function lessonDone(L, part, good, scored, sid) {
   if (!S.lessons.includes(L.id)) S.lessons.push(L.id);
   addStars(2);
   const canExtra = part === "words" && L.extra.length && !P.extra[L.id];
-  render(`<div class="big">🎉☕☕</div>
+  render(`${hero("cheer", "star_gold")}
     <h1 class="center">Тема «${esc(L.title)}» пройдена!</h1>
-    ${coach("Well done! Ты молодец! " + (canExtra ? "Хочешь ещё слов по этой теме?" : "Поехали дальше?"))}
+    ${coach("Well done! Ты молодец! " + (canExtra ? "Хочешь ещё слов по этой теме?" : "Поехали дальше?"), "cheer", true)}
     ${canExtra ? `<button class="btn navy" data-act="extra">➕ Ещё ${L.extra.length} ${plural(L.extra.length, "слово", "слова", "слов")} по теме</button>` : ""}
     ${next ? `<button class="btn" data-act="next">🚌 Урок ${next.id}: ${esc(next.title)}</button>` : ""}
     <button class="btn ghost" data-act="home">🏠 На главную</button>`, {
@@ -597,8 +699,8 @@ function gamesMenu() {
   const app = DATA.games.filter(g => g.where === "app");
   render(`${topBar(0, 0, "Игры")}
     <h1>Во что сыграем? 🎮</h1>
-    <div class="grid">${app.map(g => `<button class="card" data-act="play" data-arg="${g.key}"><span class="em">${g.emoji}</span><span>${esc(g.title)}</span>${P.records[g.key] ? `<small>🏆 ${P.records[g.key]}</small>` : ""}</button>`).join("")}
-      <button class="card wide navy" data-act="chat"><span class="em">💬</span><span>Голосовые игры и истории — в чате</span></button></div>`,
+    <div class="grid">${app.map((g, gi) => `<button class="card ${GAME_COLOR[gi % GAME_COLOR.length]}" data-act="play" data-arg="${g.key}"><span class="em">${GAME_IC[g.key] ? ic(GAME_IC[g.key]) : g.emoji}</span><span>${esc(g.title)}</span>${P.records[g.key] ? `<small>🏆 ${P.records[g.key]}</small>` : ""}</button>`).join("")}
+      <button class="card wide navy" data-act="chat"><span class="em">${ic("mic")}</span><span>Голосовые игры и истории — в чате</span></button></div>`,
     { play: k => GAMES[k](), chat: chatScreen }, home);
 }
 function endScreen(title, line, gameKey, again, score, total) {
@@ -613,8 +715,8 @@ function endScreen(title, line, gameKey, again, score, total) {
     addStars(1);
   }
   showFinish();
-  render(`<div class="big">🏁</div><h1 class="center">${esc(title)}</h1>
-    ${coach(`${line} ${pick(["Супер! ☕", "Well done! 👏", "Ты молодец! 🎉"])}`)}${rec}
+  render(`${hero("cheer", "cup")}<h1 class="center">${esc(title)}</h1>
+    ${coach(`${line} ${pick(["Супер! ☕", "Well done! 👏", "Ты молодец! 🎉"])}`, "cheer", true)}${rec}
     <button class="btn" data-act="again">🔄 Ещё раз</button>
     <button class="btn navy" data-act="games">🎮 Другие игры</button>
     <button class="btn ghost" data-act="home">🏠 На главную</button>`, { again, games: gamesMenu, home }, home);
@@ -670,8 +772,9 @@ const GAMES = {
       const same = shuffle(withGroup.filter(w => w.en !== sec.en && groupOf(w.en) === g)).slice(0, 2);
       const other = shuffle(pool.filter(w => w.en !== sec.en && groupOf(w.en) !== g)).slice(0, 5 - same.length);
       const opts = shuffle([sec].concat(same, other));
-      let step = 1, over = false;
+      let step = 1, over = false, undoUsed = false, undoOn = false, lastTap = null;
       const hints = [];
+      const clearUndo = () => { if (undoOn) { undoOn = false; document.getElementById("nextbox").innerHTML = ""; } };
       const hintFor = s => {
         if (s === 1) return g ? `Это <b>${g}</b> ${DATA.group_emoji[g] || ""}` : "Загадала слово!";
         if (s === 2) return `В этом слове ${sec.en.length} ${plural(sec.en.length, "буква", "буквы", "букв")}`;
@@ -684,9 +787,17 @@ const GAMES = {
         <div class="stage"><div class="pic">❓</div></div>
         <div class="opts">${opts.map((o, i) => `<button class="opt" data-act="g" data-arg="${i}" data-hint="${esc(o.em || "")}">${esc(o.en)}</button>`).join("")}</div>
         <div id="nextbox"></div>`, {
+        undo: () => {
+          if (over || !undoOn || !lastTap) return;
+          step--; hints.pop(); undoUsed = true; undoOn = false;
+          lastTap.b.classList.remove("tried"); lastTap.b.disabled = false;
+          setCoach(lastTap.prev, "explain"); document.getElementById("nextbox").innerHTML = ""; lastTap = null;
+        },
         g: (i, b) => {
           if (over) return;
           const o = opts[+i];
+          const prevCoach = (document.getElementById("say") || {}).innerHTML || "";
+          clearUndo();
           if (o.en === sec.en) {
             over = true; b.classList.add("right"); haptic("success"); record(sec, step === 1); score++;
             document.querySelector(".pic").textContent = sec.em || "🎉";
@@ -696,7 +807,10 @@ const GAMES = {
           b.classList.add("tried"); b.disabled = true; haptic("warning");
           const hot = groupOf(o.en) === g ? "🔥 Горячо! Это из той же компании!" : `🧊 Холодно! ${esc(o.en)} — это ${esc(ruShort(o.ru))}, а я загадала не ${groupOf(o.en) || "это"}.`;
           step++;
-          if (step <= DATA.hot_cold_steps) { hints.push(hintFor(step)); setCoach(hot + " Подсказка: " + hints[hints.length - 1]); }
+          if (step <= DATA.hot_cold_steps) {
+            hints.push(hintFor(step)); setCoach(hot + " Подсказка: " + hints[hints.length - 1], "think");
+            if (!undoUsed) { undoOn = true; lastTap = { b, prev: prevCoach }; document.getElementById("nextbox").innerHTML = UNDO_BTN; }
+          }
           else {
             over = true; record(sec, false);
             document.querySelectorAll(".opt").forEach((x, j) => { x.disabled = true; if (opts[j].en === sec.en) x.classList.add("right"); });
@@ -788,17 +902,19 @@ const GAMES = {
       }, gamesMenu);
     }
     function choose(three, others) {
-      const opts = shuffle(three.concat(others)); let sel = new Set(), tries = 0;
+      const opts = shuffle(three.concat(others)); let sel = new Set(), tries = 0, undoOn = false, undoUsed = false, snapSel = null;
       const draw = () => {
         render(`${topBar(r, R)}${coach(tries ? `Почти! Угадано ${[...sel].filter(i => three.includes(opts[i])).length} из 3. Подсказка: одно из слов начинается на «${esc(three.find((w, j) => !sel.has(opts.indexOf(w))).en[0].toUpperCase())}»` : "Какие три слова ты запомнила? Выбери три 👇")}
           <div class="opts">${opts.map((w, i) => `<button class="opt small ${sel.has(i) ? "sel" : ""}" data-act="t" data-arg="${i}">${esc(w.en)}</button>`).join("")}</div>
-          <button class="btn" data-act="ok" ${sel.size === 3 ? "" : "disabled style=opacity:.5"}>Проверить ✔</button><div id="nextbox"></div>`, {
-          t: i => { i = +i; sel.has(i) ? sel.delete(i) : sel.size < 3 && sel.add(i); draw(); },
+          <button class="btn" data-act="ok" ${sel.size === 3 ? "" : "disabled style=opacity:.5"}>Проверить ✔</button><div id="nextbox">${undoOn ? UNDO_BTN : ""}</div>`, {
+          undo: () => { if (!undoOn || !snapSel) return; tries = 0; undoUsed = true; undoOn = false; sel = snapSel; snapSel = null; draw(); },
+          t: i => { undoOn = false; i = +i; sel.has(i) ? sel.delete(i) : sel.size < 3 && sel.add(i); draw(); },
           ok: () => {
+            undoOn = false;
             const got = [...sel].filter(i => three.includes(opts[i])).length;
             if (got === 3) { three.forEach(w => record(w, tries === 0)); if (tries === 0) score++; haptic("success"); setCoach("Память как у слона! 🐘"); setTimeout(round, 1300); return; }
             tries++;
-            if (tries === 1) { [...sel].forEach(i => { if (!three.includes(opts[i])) sel.delete(i); }); draw(); return; }
+            if (tries === 1) { snapSel = new Set(sel); undoOn = !undoUsed; [...sel].forEach(i => { if (!three.includes(opts[i])) sel.delete(i); }); draw(); return; }
             three.forEach(w => record(w, false));
             render(`${topBar(r, R)}${coach("Смотри, вот эти три: " + three.map(enLine).join(", ") + ". Запомним! 💪")}
               <button class="btn" data-act="nx">Дальше ▶</button>`, { nx: round }, gamesMenu);
@@ -956,13 +1072,13 @@ function wbHome() {
         <span class="st">${P.wbs.includes(t.id) ? "✅ " : ""}⭐ ${f}/${t.words.length}</span></button>`;
     }).join("")}</div>
     <div class="grid">
-      ${stars ? `<button class="card wide" data-act="stars"><span class="em">⭐</span><span class="tx"><span>Заработай больше звёзд</span><small>${wbStarsLine(stars)}</small></span></button>` : ""}
-      <button class="card" data-act="weak"><span class="em">🔥</span><span>Слабые слова</span><small>${weak ? weak + " " + plural(weak, "слово", "слова", "слов") : "пока нет"}</small></button>
-      <button class="card" data-act="big"><span class="em">🏆</span><span>Большой диктант</span><small>15 слов</small></button>
-      <button class="card" data-act="twins"><span class="em">👯</span><span>Близнецы</span></button>
-      <button class="card" data-act="phrases"><span class="em">🧩</span><span>Фразы</span></button>
-      <button class="card" data-act="spell"><span class="em">✍️</span><span>Собери слово</span></button>
-      <button class="card" data-act="speed"><span class="em">⚡</span><span>Скоростной раунд</span>${rec ? `<small>🏆 ${rec}</small>` : ""}</button>
+      ${stars ? `<button class="card wide gold" data-act="stars"><span class="em">${aw("star_gold")}</span><span class="tx"><span>Заработай больше звёзд</span><small>${wbStarsLine(stars)}</small></span></button>` : ""}
+      <button class="card pink" data-act="weak"><span class="em">${ic("book")}</span><span>Слабые слова</span><small>${weak ? weak + " " + plural(weak, "слово", "слова", "слов") : "пока нет"}</small></button>
+      <button class="card gold" data-act="big"><span class="em">${aw("cup")}</span><span>Большой диктант</span><small>15 слов</small></button>
+      <button class="card purple" data-act="twins"><span class="em">${ic("cards")}</span><span>Близнецы</span></button>
+      <button class="card blue" data-act="phrases"><span class="em">${ic("mic")}</span><span>Фразы</span></button>
+      <button class="card green" data-act="spell"><span class="em">${ic("abc")}</span><span>Собери слово</span></button>
+      <button class="card pink" data-act="speed"><span class="em">${ic("bus")}</span><span>Скоростной раунд</span>${rec ? `<small>🏆 ${rec}</small>` : ""}</button>
     </div>`, {
     topic: id => wbTopic(id), weak: wbWeakRun, stars: () => wbStarsRun(), big: wbBigDictation, twins: wbTwinsRun, phrases: wbPhrasesRun, spell: wbSpellRun, speed: wbSpeed,
   }, home);
@@ -997,7 +1113,7 @@ function wbRuleCard(t, k, n, next, back) {
   const ex = t.examples.map(en => WB.byEn[en]).filter(Boolean);
   render(`${n ? topBar(k, n) : topBar(0, 0, "📖 Правило")}
     <h1>${t.emoji} ${esc(t.title)}</h1>
-    ${coach(esc(t.rule))}
+    ${coach(esc(t.rule), "explain")}
     <div class="list">${ex.map(w => `<button class="item" data-act="say" data-text="${esc(w.en)}">
       <span style="font-size:36px">${w.em || "🔊"}</span><span class="grow" style="font-size:36px">${wbShow(w)}</span><span class="st">🔊</span></button>`).join("")}</div>
     <button class="btn" data-act="nx">Дальше ▶</button>`, { nx: next }, back);
@@ -1061,6 +1177,8 @@ function wbTraps(word) {
 function wbSpell(w, mode, k, n, next, back, xt) {
   const word = w.en, ru = esc(ruShort(w.ru)), dict = mode === "dict", voice = dict && !!VOICE;
   let bank = shuffle(word.split("").concat(wbTraps(word)).map((c, i) => ({ c, i }))), line = [], tries = 0, over = false, lock = false;
+  let undoOn = false, undoUsed = false, snap = null, prevSnap = null, acts = 0;
+  const clearUndo = () => { if (undoOn) { undoOn = false; document.getElementById("nextbox").innerHTML = ""; } };
   const tiles = (arr, act, cls) => arr.map((x, j) => `<button class="tile ${cls || ""}" data-act="${act}" data-arg="${j}">${esc(x.c)}</button>`).join("");
   const refresh = () => {
     document.getElementById("ans").innerHTML = tiles(line, "out") || '<span class="muted">нажимай на буквы по порядку 👇</span>';
@@ -1077,12 +1195,19 @@ function wbSpell(w, mode, k, n, next, back, xt) {
     <div class="tokens" id="bank"></div>
     <button class="hint" data-act="hint">💡 Подсказка</button>
     <div id="nextbox"></div>`, {
+    undo: () => {
+      if (over || !undoOn || !snap) return;
+      tries = 0; undoUsed = true; undoOn = false; acts++; lock = false;
+      line = snap.line; bank = snap.bank; snap = null;
+      document.getElementById("nextbox").innerHTML = ""; refresh(); setCoach(say, "explain");
+    },
     in: j => {
       if (over || lock) return;
+      acts++; clearUndo(); prevSnap = { line: line.slice(), bank: bank.slice() };
       line.push(bank.splice(+j, 1)[0]); refresh();
       if (line.length === word.length) check();
     },
-    out: j => { if (over || lock) return; bank.push(line.splice(+j, 1)[0]); refresh(); },
+    out: j => { if (over || lock) return; acts++; clearUndo(); bank.push(line.splice(+j, 1)[0]); refresh(); },
     hint: () => { if (!over) setCoach("💡 " + wbHint(w)); },
   }, back || wbHome);
   refresh();
@@ -1096,9 +1221,10 @@ function wbSpell(w, mode, k, n, next, back, xt) {
     }
     tries++; haptic("warning");
     if (tries === 1) {
-      lock = true;
+      lock = true; snap = prevSnap; const myActs = acts;
       setTimeout(() => { if (over) return; bank = shuffle(bank.concat(line)); line = []; lock = false; refresh();
-        setCoach("Почти! Давай проверим: " + wbHint(w) + " Попробуй ещё!"); }, 700);
+        setCoach("Почти! Давай проверим: " + wbHint(w) + " Попробуй ещё!");
+        if (!undoUsed && snap && myActs === acts) { undoOn = true; document.getElementById("nextbox").innerHTML = UNDO_BTN; } }, 700);
     } else {
       over = true; record(w, false, "sp"); hideHint();
       document.getElementById("ans").innerHTML = tiles(word.split("").map(c => ({ c })), "x", "ok");
@@ -1177,10 +1303,10 @@ function wbChapterDone(t, idx, good, scored) {
   if (chs.every((_, i) => P.wbs.includes(t.id + ":" + i)) && !P.wbs.includes(t.id)) { P.wbs.push(t.id); stamp = true; }
   addStars(1);
   const hasNext = idx + 1 < chs.length, f = wbFlownCount(words);
-  render(`<div class="big">${stamp ? "✅" : "🎉☕"}</div>
+  render(`${hero("cheer", stamp ? "medal" : "star_gold")}
     <h1 class="center">${stamp ? "Тема «" + esc(t.title) + "» пройдена!" : "Глава " + (idx + 1) + " пройдена!"}</h1>
     ${stamp ? `<div class="stamp">✅ ${t.emoji} ${esc(t.title)}</div>` : ""}
-    ${coach(stamp ? "Ура! Все главы темы пройдены — держи штамп! 🎖" : "Well done! Ещё одна чашка чая в копилке ☕")}
+    ${coach(stamp ? "Ура! Все главы темы пройдены — держи штамп! 🎖" : "Well done! Ещё одна чашка чая в копилке ☕", "cheer", true)}
     <p class="muted center">Отлетают: ${f} из ${words.length}. ⭐ — слово уже отлетает, остальные повторим, и они тоже полетят!</p>
     <div class="chips big">${words.map(w => `<button class="chip ${wbFlown(w.en) ? "got" : ""}" data-act="say" data-text="${esc(w.en)}">${esc(w.en)}${wbFlown(w.en) ? " ⭐" : ""}</button>`).join("")}</div>
     ${f < words.length ? `<button class="btn navy" data-act="fix">✍️ Закрепить написание слов</button>` : ""}
@@ -1217,8 +1343,8 @@ function wbStarsRun(tid) {      // «Заработай больше звёзд�
 function wbEnd(title, line, again, rec, res) {      // res: [тип, верно, всего, topic] — итог в дневник
   if (res) DIARY.record(res[0], res[1], res[2], res[3]);
   stopTimer(); showFinish();
-  render(`<div class="big">🏁</div><h1 class="center">${esc(title)}</h1>
-    ${coach(`${line} ${pick(["Супер! ☕", "Well done! 👏", "Ты молодец! 🎉"])}`)}${rec || ""}
+  render(`${hero("cheer", "cup")}<h1 class="center">${esc(title)}</h1>
+    ${coach(`${line} ${pick(["Супер! ☕", "Well done! 👏", "Ты молодец! 🎉"])}`, "cheer", true)}${rec || ""}
     ${again ? `<button class="btn" data-act="again">🔄 Ещё раз</button>` : ""}
     <button class="btn navy" data-act="wb">📒 В тетрадь</button>
     <button class="btn ghost" data-act="home">🏠 На главную</button>`, { again, wb: wbHome, home }, wbHome);
@@ -1406,8 +1532,8 @@ function finishSession() {
   P.pending = { r: Object.fromEntries(d.r.map(([w, ok]) => [w, !!ok])), g: d.g, l: d.l, m: d.m, w: Object.fromEntries(d.w.map(([en, t, s]) => [en, [t, s]])) };
   S.results = {}; S.wb = {}; S.games = []; S.lessons = []; S.started = Date.now();
   save();
-  render(`<div class="big">☕</div><h1 class="center">Всё сохранено!</h1>
-    ${coach("Прогресс запомнила. Чтобы я рассказала маме, как прошло занятие, открой приложение кнопкой <b>«📱 Miss Lily»</b> внизу чата и нажми «✅ Закончить».")}
+  render(`${hero("hello", "chest")}<h1 class="center">Всё сохранено!</h1>
+    ${coach("Прогресс запомнила. Чтобы я рассказала маме, как прошло занятие, открой приложение кнопкой <b>«📱 Miss Lily»</b> внизу чата и нажми «✅ Закончить».", "hello", true)}
     <button class="btn ghost" data-act="home">🏠 На главную</button>`, { home }, home);
 }
 
