@@ -180,6 +180,73 @@ html.dark .hl{color:#ff8a9b} .pic .hl,.opt .hl{color:#c8102e}
 .item .grow{flex:1;min-width:0;line-height:1.2}
 .chips.big .chip{min-height:56px;display:inline-flex;align-items:center;padding:6px 16px;font-size:22px}
 .stamp{align-self:center;transform:rotate(-4deg);border:5px double var(--ok);color:var(--ok);background:var(--glass);border-radius:16px;padding:10px 18px;font-size:26px;font-weight:900;text-align:center;box-shadow:0 6px 14px var(--shadow)}
+/* 👧 Моя подруга и 📖 Глупая история */
+.av{position:relative;display:block;border-radius:50%;overflow:hidden;aspect-ratio:1;background:#fde9d2;border:3px solid #fff;box-shadow:0 4px 10px var(--shadow);flex:none}
+.av svg,.av img{position:absolute;inset:0;width:100%;height:100%}
+.av img{object-fit:cover}
+.gsec{display:flex;flex-direction:column;gap:6px;background:var(--glass);border-radius:22px;padding:8px 10px 10px;box-shadow:0 5px 14px var(--shadow)}
+.gsec .gh{font-size:19px;color:var(--soft)}
+.gals{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.gt{border-radius:50%;padding:3px;border:4px solid transparent;display:block}
+.gt.on{border-color:var(--red);box-shadow:0 0 0 3px var(--gold)}
+.gt .av{width:100%;border-width:2px}
+.me-fr{display:flex;align-items:center;gap:12px;background:var(--glass);border-radius:24px;padding:8px 12px;box-shadow:0 5px 14px var(--shadow)}
+.me-fr .av{width:76px}
+.me-fr b{font-size:24px;display:block;line-height:1.1}
+.me-fr small{font-size:17px;color:var(--soft)}
+.flags{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.flag{min-height:84px;border-radius:20px;background:linear-gradient(#fffdf6,var(--card));border:3px solid var(--line);color:var(--ink);font-size:15px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;box-shadow:0 4px 0 var(--line)}
+.flag span{font-size:38px;line-height:1.1}
+.flag.on{background:linear-gradient(#ffe27a,var(--gold));color:#1d2b53;border-color:var(--red)}
+.fin{width:100%;min-height:60px;border-radius:20px;border:3px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:26px;padding:6px 14px;outline:none}
+.agerow{display:flex;gap:10px}.agerow .opt{min-height:64px;font-size:30px}
+.err{color:var(--red);font-size:19px;min-height:24px;text-align:center}
+.cmsgs{display:flex;flex-direction:column;gap:10px;padding-bottom:150px}
+.msg{display:flex;align-items:flex-end;gap:8px;max-width:100%}
+.msg .av{width:46px;border-width:2px}
+.msg .mb{max-width:80%;padding:9px 14px;border-radius:22px;font-size:21px;line-height:1.25;box-shadow:0 4px 10px var(--shadow);word-break:break-word}
+.msg.fr .mb{background:var(--glass);color:var(--ink);border-bottom-left-radius:6px}
+.msg.me{justify-content:flex-end}
+.msg.me .mb{background:linear-gradient(#4f69c0,#26397f);color:#fff;border-bottom-right-radius:6px}
+.msg.lily .mb{background:#fff1c4;color:#4a2a00;border:2px solid var(--gold);border-bottom-left-radius:6px}
+.msg.lily img{height:64px;width:auto;flex:none;filter:drop-shadow(0 3px 4px rgba(0,0,0,.4))}
+.msg.sys{justify-content:center}
+.msg.sys .mb{background:rgba(14,22,58,.84);color:#fff;font-size:18px;text-align:center}
+.msg .sp{min-width:42px;min-height:42px;border-radius:50%;margin-left:4px;font-size:20px;background:#27408f;color:#fff;flex:none}
+.msg .mb .sp{display:inline-block;vertical-align:middle;margin:0 0 0 8px}
+.typing i{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--soft);margin:0 2px;animation:bnc 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes bnc{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-7px)}}
+#app>.cbar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(500px,100%);padding:8px 12px calc(10px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;background:linear-gradient(rgba(14,22,58,0),rgba(14,22,58,.88) 28%);z-index:6}
+.cbar .r1{display:flex;gap:8px}
+.cbar .r1 button{flex:1;min-height:46px;border-radius:24px;font-size:17px;font-weight:900;padding:0 8px;background:linear-gradient(#ffe27a,var(--gold));color:#1d2b53;box-shadow:0 4px 0 #b98412}
+.cbar .r1 button.sw{background:var(--glass);box-shadow:0 4px 0 var(--line)}
+.cbar .r2{display:flex;gap:8px}
+.cbar .fin{min-height:56px;font-size:22px;flex:1;min-width:0}
+.cbar .go{width:64px;min-height:56px;border-radius:20px;font-size:28px;color:#fff;background:linear-gradient(#ff5a6e,var(--red));box-shadow:0 4px 0 var(--red2)}
+.cbar .go[disabled]{opacity:.5}
+.lilymode .fin{border-color:var(--gold)}
+.send-ph{align-self:flex-start;margin-left:54px;min-height:50px;padding:0 16px;border-radius:24px;font-size:20px;background:linear-gradient(#58d68d,var(--ok));color:#fff;box-shadow:0 5px 0 #1f6e3f}
+.spic{position:relative;width:100%;aspect-ratio:4/3;border-radius:24px;overflow:hidden;background:#e8dcc4;border:6px solid #fff;box-shadow:0 8px 18px var(--shadow)}
+.spic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s}
+.spic img.ld{opacity:1}
+.shim{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:24px;color:#6a5a40;text-align:center;padding:10px;background:linear-gradient(100deg,#e8dcc4 30%,#fff7e0 50%,#e8dcc4 70%);background-size:200% 100%;animation:shim 1.3s linear infinite}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.semoji{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:64px;line-height:1.2;padding:10px;background:#fff7e0;color:#1d2b53;word-break:break-word}
+.stext{font-size:24px;line-height:1.3}
+.wopts{display:flex;flex-direction:column;gap:12px}
+.wopt{min-height:84px;border-radius:24px;padding:8px 14px;display:flex;align-items:center;gap:12px;text-align:left;background:linear-gradient(180deg,#fffdf6,var(--card));color:var(--ink);border:4px solid var(--line);box-shadow:0 6px 0 var(--line),0 10px 14px var(--shadow)}
+html.dark .wopt{background:linear-gradient(180deg,#2c3a72,var(--card))}
+.wopt .we{font-size:42px;line-height:1;flex:none}
+.wopt b{display:block;font-size:30px;line-height:1.05;color:var(--red)} html.dark .wopt b{color:#ff8a9b}
+.wopt small{display:block;font-size:20px;line-height:1.2;color:var(--ink)}
+.wopt:active{transform:translateY(2px)}
+.sfin{display:flex;flex-direction:column;gap:8px;background:var(--glass);border-radius:22px;padding:10px;box-shadow:0 5px 14px var(--shadow)}
+.sfin .spic{border-width:4px}
+.sfin p{font-size:22px;line-height:1.3}
+.sfin p b{color:var(--red)} html.dark .sfin p b{color:#ff8a9b}
+.loadbox{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:8vh;text-align:center}
+.loadbox .bunny{height:180px;width:auto;filter:drop-shadow(0 8px 10px rgba(0,0,0,.5))}
 @media (min-width:700px){
   #app{max-width:540px;padding-top:24px}
   .hdr .bunny{height:220px}
@@ -249,7 +316,7 @@ function haptic(kind) { if (!IN_TG) return; try { TG.HapticFeedback.notification
 
 /* ---------- прогресс: CloudStorage Telegram + запасной localStorage ---------- */
 const LS_KEY = "misslily_p1", CHUNK = 3000, MAXC = 10;
-function freshP() { return { v: 1, ts: 0, lesson: 1, done: [], extra: {}, words: {}, records: {}, days: {}, pending: null, wb: {}, wbs: [] }; }
+function freshP() { return { v: 1, ts: 0, lesson: 1, done: [], extra: {}, words: {}, records: {}, days: {}, pending: null, wb: {}, wbs: [], friend: null }; }
 function cloudOk() { try { return !!(IN_TG && TG.CloudStorage && TG.isVersionAtLeast && TG.isVersionAtLeast("6.9")); } catch (e) { return false; } }
 function lsGet() { try { return JSON.parse(localStorage.getItem(LS_KEY) || "null"); } catch (e) { return null; } }
 function lsSet(s) { try { localStorage.setItem(LS_KEY, s); } catch (e) {} }
@@ -437,12 +504,14 @@ function home() {
       <button class="card pink" data-act="review"><span class="em">${ic("cards")}</span><span>Повторить</span></button>
       <button class="card blue" data-act="topics"><span class="em">${ic("bus")}</span><span>Темы</span><small>${nd} из ${nl}</small></button>
       <button class="card gold" data-act="words"><span class="em">${ic("abc")}</span><span>Мои слова</span><small>${learnedCount()} ${plural(learnedCount(), "слово", "слова", "слов")}</small></button>
+      <button class="card green" data-act="friend"><span class="em">👧</span><span>Моя подруга</span><small>болтаем по-английски</small></button>
+      <button class="card blue" data-act="story"><span class="em">📖</span><span>Глупая история</span><small>сочиняем вместе</small></button>
       ${WB ? `<button class="card wide green" data-act="wb"><span class="em">${ic("notebook")}</span><span class="tx"><span>Тетрадь: исправляем тройки</span><small>${wbFlownCount(WB.all)} из ${WB.all.length} слов отлетают</small></span></button>` : ""}
       <button class="card wide navy" data-act="chat"><span class="em">${ic("mic")}</span><span>В чате: подруга, истории, голос</span></button>
     </div>
     <div class="starrow"><span class="cnt">${aw("star_gold")}${P.days[today()] || 0}</span>${[0, 1, 2, 3, 4].map(i => aw(i < today5 ? "star_gold" : "star_silver")).join("")}${aw("gift", "gift")}</div>`, {
     lesson: () => startLesson(P.lesson, "words"),
-    games: gamesMenu, review: startReview, topics: topicsScreen, words: wordsScreen, chat: chatScreen, wb: wbHome,
+    games: gamesMenu, review: startReview, topics: topicsScreen, words: wordsScreen, chat: chatScreen, wb: wbHome, friend: friendHome, story: storyHome,
   });
   $tabs.hidden = false; document.body.classList.add("tabs");
 }
@@ -1419,6 +1488,342 @@ function wbSpeed() {
   })();
 }
 
+/* ============================================================
+   👧 МОЯ ПОДРУГА и 📖 ГЛУПАЯ ИСТОРИЯ — разговор и сочинение с нейросетью.
+   Нейросеть живёт на сервере дневника (/api/eng/friend и /api/eng/story), сюда приходит только текст.
+   Запрос подписан initData Telegram (как события дневника). Состояние — здесь, сервер ничего не помнит.
+   Картинки к истории грузит сам телефон по адресу от сервера; не загрузилась — сценка из эмодзи.
+   ============================================================ */
+const ENG_API = "https://35-225-33-86.sslip.io/api/eng/";
+const FRIEND_LS = "misslily_friend", FCHAT_LS = "misslily_fchat";
+const FR = { msgs: [], lily: [], lilyOn: false, busy: false, sent: 0, rewarded: false, sid: "", swapAsk: false };
+let SETUP = null, STORY = null;
+
+function aiInit() { try { return (TG && TG.initData) || ""; } catch (e) { return ""; } }
+async function aiPost(path, body) {
+  const id = aiInit();
+  if (!id) return { ok: false, error: "no_tg", message: "Подруга и истории работают, когда приложение открыто из Telegram. Открой его кнопкой в чате с Мисс Лили." };
+  let ctl = null, t = null;
+  try { ctl = new AbortController(); t = setTimeout(() => ctl.abort(), 50000); } catch (e) {}
+  try {
+    const r = await fetch(ENG_API + path, { method: "POST", headers: { "Content-Type": "application/json", "X-Init-Data": id }, body: JSON.stringify(body), signal: ctl ? ctl.signal : undefined });
+    let j = null; try { j = await r.json(); } catch (e) {}
+    if (r.ok && j && j.ok) return j;
+    return { ok: false, error: (j && j.error) || "http" + r.status, message: (j && j.message) || "Ой, что-то пошло не так. Попробуй ещё раз!" };
+  } catch (e) {
+    return { ok: false, error: "net", message: "Нет связи. Проверь интернет и попробуй ещё раз." };
+  } finally { if (t) clearTimeout(t); }
+}
+function knownWords() {   // что Катя уже знает: сначала верно отвеченные, потом слова пройденных тем
+  const got = Object.keys(P.words).filter(en => P.words[en].ok >= 1);
+  const all = got.concat(poolItems().map(w => w.en)).filter(w => /^[a-z][a-z' -]{0,29}$/.test(w));
+  return [...new Set(all)].slice(0, 60);
+}
+const rich = s => esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>");
+const plainEn = s => String(s).replace(/[^\x20-\x7E]+/g, " ").replace(/\s+/g, " ").trim();
+const emo = w => (ALL[w] && ALL[w].em) || (DATA.emoji && DATA.emoji[w]) || "";
+
+/* ---------- портрет: картинка галереи, а пока её нет, силуэт ---------- */
+function silhouette(skin, hair, style) {
+  const FD = DATA.friend, sk = "rgb(" + (FD.skins[skin] || FD.skins.european).rgb + ")", hr = "rgb(" + (FD.hair_colours[hair] || FD.hair_colours.brown).rgb + ")";
+  let back = "";
+  if (style === "long") back = `<rect x="27" y="30" width="46" height="62" rx="22" fill="${hr}"/>`;
+  else if (style === "curly") back = [30, 42, 54, 66, 24, 76].map((x, i) => `<circle cx="${x + (i > 3 ? 0 : 2)}" cy="${i > 3 ? 56 : 34 + (i % 2) * 5}" r="${i > 3 ? 11 : 12}" fill="${hr}"/>`).join("");
+  else if (style === "tails") back = `<circle cx="22" cy="54" r="11" fill="${hr}"/><circle cx="78" cy="54" r="11" fill="${hr}"/><ellipse cx="50" cy="40" rx="25" ry="22" fill="${hr}"/>`;
+  else back = `<ellipse cx="50" cy="42" rx="26" ry="26" fill="${hr}"/>`;
+  return `<svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#fde9d2"/><ellipse cx="50" cy="108" rx="36" ry="26" fill="#6d8fd8"/>${back}
+    <rect x="44" y="60" width="12" height="14" rx="5" fill="${sk}"/><ellipse cx="50" cy="48" rx="19" ry="22" fill="${sk}"/>
+    <path d="M30 46 Q32 22 50 22 Q68 22 70 46 Q60 33 50 34 Q40 33 30 46Z" fill="${hr}"/>
+    <circle cx="43" cy="50" r="2.4" fill="#3b2a22"/><circle cx="57" cy="50" r="2.4" fill="#3b2a22"/><path d="M43 58 Q50 64 57 58" stroke="#b05a5a" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>`;
+}
+function avatar(f, cls) {
+  const file = `img/friends/${f.skin}_${f.hair_colour || f.hair}_${f.hair_style || f.style}.webp`;
+  return `<span class="av ${cls || ""}">${silhouette(f.skin, f.hair_colour || f.hair, f.hair_style || f.style)}<img src="${file}" alt="" draggable="false" onerror="this.remove()"></span>`;
+}
+
+/* ---------- подруга: сохранение ---------- */
+function loadFriend() {
+  let f = P.friend;
+  if (!f) { try { f = JSON.parse(localStorage.getItem(FRIEND_LS) || "null"); } catch (e) { f = null; } }
+  const FD = DATA.friend;
+  if (!f || !FD.countries[f.country] || !FD.skins[f.skin]) return null;
+  return f;
+}
+function saveFriend(f) {
+  P.friend = f; save();
+  try { localStorage.setItem(FRIEND_LS, JSON.stringify(f)); } catch (e) {}
+}
+function clearFriend() {
+  P.friend = null; save();
+  try { localStorage.removeItem(FRIEND_LS); localStorage.removeItem(FCHAT_LS); } catch (e) {}
+}
+function loadChat(f) {
+  try { const d = JSON.parse(localStorage.getItem(FCHAT_LS) || "null"); if (d && d.name === f.name && d.country === f.country && Array.isArray(d.msgs)) return d.msgs.filter(m => m && (m.role === "user" || m.role === "assistant") && typeof m.text === "string").slice(-40); } catch (e) {}
+  return [];
+}
+function saveChat(f) { try { localStorage.setItem(FCHAT_LS, JSON.stringify({ name: f.name, country: f.country, msgs: FR.msgs.slice(-40) })); } catch (e) {} }
+
+function friendHome() {
+  stopTimer();
+  const f = loadFriend();
+  if (f) { P.friend = f; return friendChat(f); }
+  SETUP = { step: 1, i: -1, country: "", name: "", age: 8, err: "" };
+  friendSetup();
+}
+
+/* ---------- создание подруги ---------- */
+function friendSetup() {
+  const FD = DATA.friend;
+  if (SETUP.step === 1) {
+    const secs = Object.keys(FD.skins).map(sk => {
+      const items = FD.gallery.map((g, i) => ({ g, i })).filter(x => x.g.skin === sk);
+      return `<div class="gsec"><div class="gh">${esc(FD.skins[sk].ru)}</div><div class="gals">${items.map(({ g, i }) =>
+        `<button class="gt ${SETUP.i === i ? "on" : ""}" data-act="gpick" data-arg="${i}" aria-label="${esc(FD.skins[sk].ru + ", " + FD.hair_colours[g.hair].ru + ", " + FD.hair_styles[g.style].ru)}">${avatar({ skin: g.skin, hair: g.hair, style: g.style })}</button>`).join("")}</div></div>`;
+    }).join("");
+    render(`${miniTop("Моя подруга")}
+      <h1>Какая она, твоя подруга? 👧</h1>
+      <p class="muted">Выбери портрет. Подруга живёт в другой стране и пишет только по-английски.</p>
+      ${secs}
+      <button class="btn" data-act="gnext" ${SETUP.i < 0 ? "disabled" : ""} id="gnext">Дальше ▶</button>`, {
+      gpick: i => {
+        SETUP.i = +i;
+        document.querySelectorAll(".gt").forEach(b => b.classList.toggle("on", b.dataset.arg === String(i)));
+        const b = document.getElementById("gnext"); if (b) b.disabled = false;
+      },
+      gnext: () => { if (SETUP.i < 0) return; const g = FD.gallery[SETUP.i];
+        if (!SETUP.country) SETUP.country = Object.keys(FD.countries).find(k => FD.countries[k].look === g.skin) || "uk";
+        SETUP.step = 2; friendSetup(); },
+    }, home);
+    return;
+  }
+  const g = FD.gallery[SETUP.i], C = FD.countries[SETUP.country];
+  render(`${miniTop("Моя подруга")}
+    <div class="me-fr">${avatar({ skin: g.skin, hair: g.hair, style: g.style })}<span><b>${SETUP.name ? esc(SETUP.name) : "Как её зовут?"}</b><small>${esc(FD.skins[g.skin].ru)} · ${esc(FD.hair_colours[g.hair].ru.toLowerCase())} · ${esc(FD.hair_styles[g.style].ru.toLowerCase())}</small></span></div>
+    <div class="ttl" style="font-size:22px">Из какой она страны?</div>
+    <div class="flags">${Object.keys(FD.countries).map(k => `<button class="flag ${k === SETUP.country ? "on" : ""}" data-act="gcountry" data-arg="${k}"><span>${FD.countries[k].flag}</span>${esc(FD.countries[k].name_ru)}</button>`).join("")}</div>
+    <div class="ttl" style="font-size:22px">Имя</div>
+    <div class="chips big">${C.names.map(n => `<button class="chip ${SETUP.name === n ? "got" : ""}" data-act="gname" data-arg="${esc(n)}">${esc(n)}</button>`).join("")}</div>
+    <input class="fin" id="fname" maxlength="20" placeholder="или впиши своё (English)" autocomplete="off" autocapitalize="words" spellcheck="false" value="${esc(SETUP.name)}">
+    <div class="ttl" style="font-size:22px">Сколько ей лет?</div>
+    <div class="agerow">${FD.ages.map(a => `<button class="opt ${SETUP.age === a ? "sel" : ""}" data-act="gage" data-arg="${a}">${a}</button>`).join("")}</div>
+    <div class="err" id="gerr">${esc(SETUP.err)}</div>
+    <button class="btn green" data-act="gdone">Познакомиться! 💌</button>`, {
+    gcountry: k => { SETUP.country = k; SETUP.err = ""; friendSetup(); },
+    gname: n => { SETUP.name = n; SETUP.err = ""; friendSetup(); },
+    gage: a => { SETUP.age = +a; SETUP.err = ""; friendSetup(); },
+    gdone: () => {
+      const name = (document.getElementById("fname").value || "").trim();
+      if (!/^[A-Za-z][A-Za-z' -]{0,19}$/.test(name)) { SETUP.name = name; SETUP.err = "Имя подруги пиши английскими буквами, например Emma"; return friendSetup(); }
+      const f = { name, country: SETUP.country, age: SETUP.age, skin: g.skin, hair_colour: g.hair, hair_style: g.style, portrait: g.file };
+      saveFriend(f);
+      try { localStorage.removeItem(FCHAT_LS); } catch (e) {}
+      friendChat(f);
+    },
+  }, () => { SETUP.step = 1; friendSetup(); });
+}
+const miniTop = label => `<div class="top"><button class="back" data-act="back" aria-label="Назад">←</button><div class="prog">${esc(label)}</div></div>`;
+
+/* ---------- чат с подругой ---------- */
+function bubbleHtml(m, f) {
+  if (m.role === "user") return `<div class="msg me"><div class="mb">${esc(m.text)}</div></div>`;
+  const en = plainEn(m.text);
+  return `<div class="msg fr">${avatar(f)}<div class="mb">${esc(m.text)}${en ? `<button class="sp" data-act="say" data-text="${esc(en)}" aria-label="Послушать">🔊</button>` : ""}</div></div>`;
+}
+function friendChat(f) {
+  stopTimer();
+  FR.msgs = loadChat(f); FR.lily = []; FR.lilyOn = false; FR.busy = false; FR.sent = 0; FR.rewarded = false; FR.swapAsk = false;
+  FR.sid = (DIARY.newSid && DIARY.newSid()) || "ks-" + Date.now();
+  const C = DATA.friend.countries[f.country];
+  render(`<div class="top"><button class="back" data-act="back" aria-label="Назад">←</button>
+      ${avatar(f, "")}<div class="prog" style="display:flex;flex-direction:column;line-height:1.1"><span>${esc(f.name)} ${C.flag}</span><span style="font-size:16px;font-weight:700;opacity:.85">${esc(C.name_ru)}, ${f.age} лет</span></div></div>
+    <div class="cmsgs" id="msgs">${FR.msgs.map(m => bubbleHtml(m, f)).join("")}</div>
+    <div class="cbar" id="cbar">
+      <div class="r1"><button data-act="lily" id="lilybtn">👩‍🏫 Позвать Лили</button><button class="sw" data-act="swap" id="swapbtn">🔁 Сменить подругу</button></div>
+      <div class="r2"><input class="fin" id="fin" maxlength="300" placeholder="Write in English…" autocomplete="off" autocapitalize="sentences" spellcheck="false"><button class="go" data-act="send" id="gosend" aria-label="Отправить">➤</button></div>
+    </div>`, {
+    send: () => chatSend(f),
+    lily: () => (FR.lilyOn ? lilyBack(f) : lilyCall(f)),
+    swap: () => {
+      const b = document.getElementById("swapbtn");
+      if (!FR.swapAsk) { FR.swapAsk = true; b.textContent = "Точно сменить?"; setTimeout(() => { FR.swapAsk = false; const x = document.getElementById("swapbtn"); if (x) x.textContent = "🔁 Сменить подругу"; }, 4000); return; }
+      clearFriend(); friendHome();
+    },
+    lsend: ph => { lilyBack(f); sendToFriend(f, ph); },
+  }, () => { saveChat(f); home(); });
+  if (!FR.msgs.length) greet(f); else scrollEnd();
+}
+const scrollEnd = () => setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 30);
+function addNode(html) {
+  const box = document.getElementById("msgs"); if (!box) return null;
+  const d = document.createElement("div"); d.innerHTML = html; const n = d.firstElementChild; box.appendChild(n); scrollEnd(); return n;
+}
+function setBusy(b) { FR.busy = b; const g = document.getElementById("gosend"); if (g) g.disabled = b; }
+function showTyping(f, lily) {
+  return addNode(`<div class="msg ${lily ? "lily" : "fr"} typing">${lily ? bunny("think") : avatar(f)}<div class="mb"><i></i><i></i><i></i></div></div>`);
+}
+function failNote(msg) { addNode(`<div class="msg sys"><div class="mb">${esc(msg)}</div></div>`); }
+async function greet(f) {
+  setBusy(true); const ty = showTyping(f);
+  const r = await aiPost("friend", { friend: f, history: [], message: "", known_words: knownWords() });
+  if (ty) ty.remove(); setBusy(false);
+  if (!document.getElementById("msgs")) return;
+  if (!r.ok) return failNote(r.message);
+  pushFriend(f, r.reply);
+}
+function pushFriend(f, text) {
+  FR.msgs.push({ role: "assistant", text }); saveChat(f);
+  addNode(bubbleHtml({ role: "assistant", text }, f));
+  speak(plainEn(text), true);
+}
+function chatSend(f) {
+  const inp = document.getElementById("fin"); if (!inp || FR.busy) return;
+  const text = inp.value.trim(); if (!text) return;
+  inp.value = "";
+  if (FR.lilyOn) return lilySend(f, text);
+  sendToFriend(f, text);
+}
+async function sendToFriend(f, text) {
+  if (FR.busy) return;
+  text = String(text).trim().slice(0, 300); if (!text) return;
+  const history = FR.msgs.slice(-12);
+  FR.msgs.push({ role: "user", text }); const mine = addNode(bubbleHtml({ role: "user", text }, f));
+  setBusy(true); const ty = showTyping(f);
+  const r = await aiPost("friend", { friend: f, history, message: text, known_words: knownWords() });
+  if (ty) ty.remove(); setBusy(false);
+  if (!document.getElementById("msgs")) return;
+  if (!r.ok) {   // не дошло: убираем сообщение, текст возвращаем в поле
+    FR.msgs.pop(); if (mine) mine.remove();
+    const inp = document.getElementById("fin"); if (inp && !inp.value) inp.value = text;
+    return failNote(r.message);
+  }
+  FR.sent++;
+  pushFriend(f, r.reply);
+  if (FR.sent >= 5 && !FR.rewarded) {   // 5 реплик Кати — разговор засчитан в дневник (один раз за открытие чата)
+    FR.rewarded = true; DIARY.record("friend", 1, 1, "", FR.sid); addStars(1);
+    toast("Вы так хорошо поболтали! ⭐", 2600);
+  }
+}
+/* «Позвать Лили»: Катя отходит в сторонку, подруга ждёт */
+function lilyMode(f, on) {
+  FR.lilyOn = on;
+  const bar = document.getElementById("cbar"), inp = document.getElementById("fin"), b = document.getElementById("lilybtn");
+  if (bar) bar.classList.toggle("lilymode", on);
+  if (inp) inp.placeholder = on ? "Спроси Лили по-русски…" : "Write in English…";
+  if (b) b.textContent = on ? "↩ Вернуться к подруге" : "👩‍🏫 Позвать Лили";
+}
+async function lilyCall(f) {
+  if (FR.busy) return;
+  lilyMode(f, true);
+  addNode(`<div class="msg sys"><div class="mb">Мисс Лили подошла. Подруга подождёт 😊</div></div>`);
+  if (FR.lily.length) return;
+  await lilyAsk(f, "");
+}
+async function lilyAsk(f, question) {
+  setBusy(true); const ty = showTyping(f, true);
+  const r = await aiPost("friend", { friend: f, help: true, history: FR.msgs.slice(-12), message: question, lily: FR.lily.slice(-8), known_words: knownWords() });
+  if (ty) ty.remove(); setBusy(false);
+  if (!document.getElementById("msgs")) return;
+  if (!r.ok) return failNote(r.message);
+  if (!FR.lily.length) FR.lily.push({ role: "user", text: "Помоги мне, я застряла." });
+  if (question) FR.lily.push({ role: "user", text: question });
+  FR.lily.push({ role: "assistant", text: r.reply });
+  addNode(`<div class="msg lily">${bunny("explain")}<div class="mb">${rich(r.reply)}</div></div>`);
+  if (r.phrase) {
+    const n = addNode(`<button class="send-ph" data-act="lsend" data-arg="${esc(r.phrase)}">📤 Отправить: ${esc(r.phrase.slice(0, 40))}</button>`);
+  }
+}
+function lilySend(f, text) {
+  addNode(`<div class="msg me"><div class="mb">${esc(text)}</div></div>`);
+  lilyAsk(f, text);
+}
+function lilyBack(f) {
+  if (!FR.lilyOn) return;
+  lilyMode(f, false); FR.lily = [];
+  addNode(`<div class="msg sys"><div class="mb">Мисс Лили ушла. Пиши подруге!</div></div>`);
+}
+
+/* ---------- Глупая история ---------- */
+function storyWords(used) {   // три слова для кнопок: знакомые, у которых есть картинка-эмодзи
+  const learned = new Set(Object.keys(P.words).filter(en => P.words[en].ok >= 1));
+  const ok = w => w && w.en && /^[a-z]+$/.test(w.en) && emo(w.en) && !used.includes(w.en);
+  let a = shuffle(poolItems().filter(w => ok(w) && learned.has(w.en))), b = shuffle(poolItems().filter(w => ok(w) && !learned.has(w.en)));
+  let out = a.concat(b).map(w => w.en);
+  if (out.length < 3) out = out.concat(shuffle(Object.values(ALL).filter(ok).sort((x, y) => x.lesson - y.lesson).slice(0, 30)).map(w => w.en));   // не хватило — самые первые слова с картинкой
+  return [...new Set(out)].slice(0, 3);
+}
+function storyHome() {
+  stopTimer();
+  STORY = { state: { text: [], words: [], picks: [] }, scenes: [], sid: (DIARY.newSid && DIARY.newSid()) || "ks-" + Date.now(), done: false };
+  storyNext();
+}
+function storyLoading(n) {
+  render(`${miniTop(n > 1 ? "Сцена " + n + " из 5" : "Глупая история")}
+    <div class="loadbox">${bunny("think")}<div class="bubble">${n > 1 ? "Придумываю, что было дальше…" : "Сочиняю смешную историю…"} ✏️</div></div>`, {}, home);
+}
+async function storyNext() {
+  const n = STORY.state.text.length + 1;
+  storyLoading(n);
+  const r = await aiPost("story", { state: STORY.state, words: storyWords(STORY.state.words), known_words: knownWords() });
+  if (!document.querySelector(".loadbox")) return;   // ушла с экрана
+  if (!r.ok) {
+    render(`${miniTop("Глупая история")}
+      <div class="loadbox">${bunny("think")}<div class="bubble">${esc(r.message)}</div></div>
+      <button class="btn" data-act="retry">Ещё раз 🔁</button>
+      <button class="btn ghost" data-act="back">← Назад</button>`, { retry: storyNext }, home);
+    return;
+  }
+  storyScene(r);
+}
+function emojiScene(words) {
+  const e = words.map(emo).filter(Boolean);
+  return e.length ? e.slice(-6).join("  ") : "✨ 📖 ✨";
+}
+function wirePic(box, words) {   // картинка: пока грузится — заглушка с анимацией; не вышло — эмодзи
+  const img = box.querySelector("img"), shim = box.querySelector(".shim"); if (!img) return;
+  let done = false;
+  const fallback = () => { if (done) return; done = true; if (shim) shim.remove(); img.remove(); box.insertAdjacentHTML("beforeend", `<div class="semoji">${esc(emojiScene(words))}</div>`); box.dataset.fb = "1"; };
+  img.addEventListener("load", () => { if (done) return; done = true; img.classList.add("ld"); if (shim) shim.remove(); });
+  img.addEventListener("error", fallback);
+  const t = setTimeout(fallback, 35000); img.addEventListener("load", () => clearTimeout(t));
+  if (img.complete && img.naturalWidth) img.dispatchEvent(new Event("load"));
+}
+function storyScene(r) {
+  const n = r.scene, words = STORY.state.words.concat(r.words);
+  STORY.cur = r;
+  STORY.scenes[n - 1] = { text: r.text, picture: r.picture, words: STORY.state.words.slice(), opts: r.words.slice(), pick: "" };
+  render(`${miniTop("Сцена " + n + " из " + r.total)}
+    <div class="spic" id="spic"><div class="shim"><span>🎨 Рисую картинку…</span></div><img id="simg" alt="" src="${esc(r.picture)}"></div>
+    <div class="bubble stext">${rich(r.text)}</div>
+    ${r.finished ? `<button class="btn green" data-act="sfinal">🎉 Конец! Читать всю историю</button>` :
+      `<div class="ttl" style="font-size:22px">Что дальше?</div><div class="wopts">${r.options.map((o, i) => `<button class="wopt" data-act="spick" data-arg="${i}"><span class="we">${emo(o.word) || "✨"}</span><span><b>${esc(o.word)}</b><small>${rich(o.text)}</small></span></button>`).join("")}</div>`}`, {
+    spick: i => {
+      const o = r.options[+i]; if (!o) return;
+      speak(o.word, true);
+      STORY.scenes[n - 1].pick = o.text;
+      STORY.state.text.push(r.text); STORY.state.words.push(o.word); STORY.state.picks.push(o.text);
+      storyNext();
+    },
+    sfinal: () => { STORY.state.text.push(r.text); storyFinal(); },
+  }, home);
+  wirePic(document.getElementById("spic"), words);
+}
+function storyFinal() {
+  if (!STORY.done) {   // история дописана: в дневник уходит одно событие (повтор не страшен — тот же session_id)
+    STORY.done = true; DIARY.record("story", 1, 1, "", STORY.sid); addStars(1);
+    toast("Какая смешная история! ⭐", 2800);
+  }
+  render(`${miniTop("Готово!")}
+    <h1 class="center">Вот что получилось! 🎉</h1>
+    ${STORY.scenes.map((s, i) => `<div class="sfin"><div class="spic" data-i="${i}"><div class="shim"><span>🎨</span></div><img alt="" src="${esc(s.picture)}"></div>
+      <p>${rich(s.text)}</p>${s.pick ? `<p class="muted" style="font-size:19px">➜ ${rich(s.pick)}</p>` : ""}</div>`).join("")}
+    <button class="btn" data-act="again">📖 Ещё историю</button>
+    <button class="btn ghost" data-act="back">🏠 На главную</button>`, { again: storyHome }, home);
+  document.querySelectorAll(".sfin .spic").forEach(b => wirePic(b, STORY.scenes[+b.dataset.i].words.concat(STORY.scenes[+b.dataset.i].opts)));
+}
+document.addEventListener("input", e => { if (e.target && e.target.id === "fname" && SETUP) SETUP.name = e.target.value; });
+document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target && e.target.id === "fin") { e.preventDefault(); if (ACTS.send) ACTS.send(); } });
+
+
   /* =====================================================================
      ДНЕВНИК «Катиной школы»: каждое завершённое занятие/игра уходит туда ровно один раз.
      initData подписан токеном этого бота, дневник это проверяет. Сначала событие кладётся в
@@ -1483,7 +1888,7 @@ function wbSpeed() {
       // не дошедшее до дневника — в sendData боту (бот досылает с тем же session_id)
       pending: function () {
         try {
-          return qGet().slice(-12).map(function (x) {
+          return qGet().filter(function (x) { return x.kind === "lesson_done" || x.kind === "game"; }).slice(-12).map(function (x) {
             return [x.session_id, x.kind === "game" ? "g" : "l", x.topic || null, x.correct, x.total];
           });
         } catch (e) { return []; }
@@ -1552,7 +1957,7 @@ function finishSession() {
   P = await loadP();
   save();
   const go = URLP.get("go");
-  if (go === "games") gamesMenu(); else if (go === "words") wordsScreen(); else home();
+  if (go === "games") gamesMenu(); else if (go === "words") wordsScreen(); else if (go === "friend") friendHome(); else if (go === "story") storyHome(); else home();
 })();
 </script>
 </body>
